@@ -14,7 +14,7 @@
     UITableView * tv;
     UIView  * insertView;
 //    AFPopupView * afView;
-    int didSelected;
+    NSInteger didSelected;
     
     NIDropDown *dropDown;
     NIDropDown *dropDown2;
@@ -29,7 +29,7 @@
     BOOL isRQ;
     
     //记录到第几页，用于上拉刷新
-    int pageNum;
+    NSInteger pageNum;
     
     BOOL isTvCreated;
 }

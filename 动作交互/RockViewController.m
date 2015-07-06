@@ -15,9 +15,9 @@
 @interface RockViewController () <UMSocialUIDelegate>
 {
     UILabel *timesLabel;
-    UILabel *rewardLabel;
-    UIImageView *rewardImage;
-    UILabel *descRewardLabel;
+//    UILabel *rewardLabel;
+//    UIImageView *rewardImage;
+//    UILabel *descRewardLabel;
     UIImageView *floating1;
     UIImageView *floating2;
     UIImageView *floating3;
@@ -27,7 +27,7 @@
 //@property (nonatomic,retain)NSMutableArray *badGiftDataArray;
 
 @property (nonatomic,strong)UIScrollView *upView;
-@property (nonatomic)NSInteger count;
+@property (nonatomic,assign)NSInteger count;
 @property (nonatomic)BOOL isShaking;
 @property (nonatomic,strong)NSTimer *timer;
 @property (nonatomic)CGFloat distance;
@@ -133,7 +133,7 @@
             self.count = index;
             
             
-            timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%d",self.count] insertAtIndex:4];
+            timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%ld",self.count] insertAtIndex:4];
             
             if (self.count <= 0) {
                 self.upView.contentOffset = CGPointMake(300*3, 0);
@@ -180,41 +180,79 @@
 //    if (self.count <= 0) {
 //        self.upView.contentOffset = CGPointMake(300*3, 0);
 //    }
-    GiftShopModel * model = [[GiftShopModel alloc] init];
+    GiftsModel * model = nil;
     int index=0,a=0;
 //    NSString * add_rq;
     
     index = arc4random()%1000+1;
+    
+    NSDictionary *dict = [ControllerManager returnTotalGiftDict];
+    NSMutableArray *allKeys = [NSMutableArray arrayWithArray:[dict allKeys]];
+    //随机基数
+    NSInteger count = 0;
     if (!self.isTrouble) {
 //        index = arc4random()%(self.goodGiftDataArray.count);
         if (index<=800) {
             //1档
-            a = arc4random()%4+1+1100;
+            for (NSString *giftId in allKeys) {
+                if ([giftId integerValue]/1000 == 1 && [giftId integerValue]%1000/100 == 1) {
+                    count++;
+                }
+            }
+            a = arc4random()%count+1+1100;
         }else if(index<=900){
             //2档
+            for (NSString *giftId in allKeys) {
+                if ([giftId integerValue]/1000 == 1 && [giftId integerValue]%1000/200 == 1) {
+                    count++;
+                }
+            }
             a = arc4random()%4+1+1200;
         }else if(index<=970){
             //3档
+            for (NSString *giftId in allKeys) {
+                if ([giftId integerValue]/1000 == 1 && [giftId integerValue]%1000/300 == 1) {
+                    count++;
+                }
+            }
             a = arc4random()%4+1+1300;
         }else{
             //4档
+            for (NSString *giftId in allKeys) {
+                if ([giftId integerValue]/1000 == 1 && [giftId integerValue]%1000/400 == 1) {
+                    count++;
+                }
+            }
             a = arc4random()%4+1+1400;
         }
-        NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:[NSString stringWithFormat:@"%d", a]];
-        [model setValuesForKeysWithDictionary:dict];
+        model = [ControllerManager returnGiftsModelWithGiftId:[NSString stringWithFormat:@"%d", a]];
+//        NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:[NSString stringWithFormat:@"%d", a]];
+//        [model setValuesForKeysWithDictionary:dict];
 //        model = self.goodGiftDataArray[index];
 //        add_rq = [NSString stringWithFormat:@"+%@",model.add_rq];
     }else{
 //        index = arc4random()%(self.badGiftDataArray.count);
         if (index<=800) {
             //捣乱1档
+            for (NSString *giftId in allKeys) {
+                if ([giftId integerValue]/2000 == 1 && [giftId integerValue]%2000/100 == 1) {
+                    count++;
+                }
+            }
             a = arc4random()%4+1+2100;
         }else {
             //礼物1档
+            for (NSString *giftId in allKeys) {
+                if ([giftId integerValue]/1000 == 1 && [giftId integerValue]%1000/100 == 1) {
+                    count++;
+                }
+            }
             a = arc4random()%7+1+1100;
         }
-        NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:[NSString stringWithFormat:@"%d", a]];
-        [model setValuesForKeysWithDictionary:dict];
+        
+        model = [ControllerManager returnGiftsModelWithGiftId:[NSString stringWithFormat:@"%d", a]];
+//        NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:[NSString stringWithFormat:@"%d", a]];
+//        [model setValuesForKeysWithDictionary:dict];
 //        model = self.badGiftDataArray[index];
 //        add_rq = model.add_rq;
     }
@@ -241,9 +279,9 @@
     } completion:^(BOOL finished) {
 //        totalView.hidden = YES;
     }];
-    NSLog(@"%d", self.count);
+    NSLog(@"%ld", self.count);
     result.leftShakeTimes = self.count;
-    [result configUIWithName:self.pet_name ItemId:model.no Tx:self.pet_tx];
+    [result configUIWithName:self.pet_name ItemId:model.gift_id Tx:self.pet_tx];
     [self.view addSubview:result];
     result.sendThis = ^(){
         //送礼
@@ -256,7 +294,7 @@
 //        }completion:^(BOOL finished) {
             self.isShaking = NO;
 //        }];
-        timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%d",self.count] insertAtIndex:4];
+        timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%ld",self.count] insertAtIndex:4];
         
         [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(shakeAction) name:@"shake" object:nil];
     };
@@ -264,7 +302,7 @@
     result.closeBlock = ^(){
         [self colseGiftAction];
     };
-    [model release];
+//    [model release];
     [result release];
     
     if (self.isFromStar) {
@@ -273,10 +311,10 @@
 }
 
 
--(void)sendGift:(GiftShopModel *)model
+-(void)sendGift:(GiftsModel *)model
 {
     LOADING;
-    NSString *item = model.no;
+    NSString *item = model.gift_id;
     NSString *sendSig = [MyMD5 md5:[NSString stringWithFormat:@"aid=%@&is_shake=1&item_id=%@dog&cat", self.pet_aid, item]];
     NSString *sendString = [NSString stringWithFormat:@"%@%@&is_shake=1&item_id=%@&sig=%@&SID=%@",SENDSHAKEGIFT, self.pet_aid,item,sendSig,[ControllerManager getSID]];
     NSLog(@"赠送url:%@",sendString);
@@ -299,7 +337,7 @@
                 };
                 [self.view addSubview:send.view];
                 [send release];
-                [send configUIWithName:self.pet_name ItemId:model.no Tx:self.pet_tx];
+                [send configUIWithName:self.pet_name ItemId:model.gift_id Tx:self.pet_tx];
                 [UIView animateWithDuration:0.3 animations:^{
                     send.view.alpha = 1;
                 }];
@@ -402,6 +440,9 @@
     _upView.showsVerticalScrollIndicator = NO;
     _upView.contentSize = CGSizeMake(_upView.frame.size.width*4, _upView.frame.size.height);
     _upView.scrollEnabled = NO;
+    /**
+     *  dd
+     */
     [bodyView addSubview:_upView];
     [_upView release];
 #pragma mark - one
@@ -441,6 +482,9 @@
     shakeDescLabel1.textColor = GRAYBLUECOLOR;
     [self.upView addSubview:shakeDescLabel1];
     UIImageView *shakeImageView1 = [MyControl createImageViewWithFrame:CGRectMake(self.upView.frame.size.width/2 - 95, 65, 190, 190) ImageName:@"rock1.png"];
+    //6.30 摇一摇的点击。
+    UITapGestureRecognizer *tapImage = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(shakeAction)];
+    [shakeImageView1 addGestureRecognizer:tapImage];
     [self.upView addSubview:shakeImageView1];
 
 #pragma mark - four
@@ -526,7 +570,7 @@
     
     timesLabel = [MyControl createLabelWithFrame:CGRectMake(70, 27, 220, 20) Font:12 Text:nil];
     timesLabel.textColor = GRAYBLUECOLOR;
-    timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%d",self.count] insertAtIndex:4];
+    timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%ld",self.count] insertAtIndex:4];
     [downView addSubview:timesLabel];
 #pragma mark - 捣捣乱
     if (self.isTrouble) {
@@ -563,7 +607,7 @@
         NSLog(@"微信");
         //强制分享图片
         [UMSocialData defaultData].extConfig.wxMessageType = UMSocialWXMessageTypeWeb;
-        [UMSocialData defaultData].extConfig.wechatSessionData.url = [NSString stringWithFormat:@"%@%@&SID=%@", SHAKESHAREAPI, self.pet_aid, [ControllerManager getSID]];
+        [UMSocialData defaultData].extConfig.wechatSessionData.url = [NSString stringWithFormat:@"%@%@", SHAKESHAREAPI, self.pet_aid];
         [UMSocialData defaultData].extConfig.wechatSessionData.title = @"摇一摇，手不酸了~";
         
         [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:@"你有事儿么？没事摇一摇~" image:image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
@@ -581,7 +625,7 @@
         NSLog(@"朋友圈");
         //强制分享图片
         [UMSocialData defaultData].extConfig.wxMessageType = UMSocialWXMessageTypeWeb;
-        [UMSocialData defaultData].extConfig.wechatTimelineData.url = [NSString stringWithFormat:@"%@%@&SID=%@", SHAKESHAREAPI, self.pet_aid, [ControllerManager getSID]];
+        [UMSocialData defaultData].extConfig.wechatTimelineData.url = [NSString stringWithFormat:@"%@%@", SHAKESHAREAPI, self.pet_aid];
         [UMSocialData defaultData].extConfig.wechatTimelineData.title = @"你有事儿么？没事摇一摇~";
         
         [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:nil image:image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
@@ -597,7 +641,7 @@
         }];
     }else if(sender.tag == 102){
         NSLog(@"微博");
-        NSString * str = [NSString stringWithFormat:@"你有事儿么？没事摇一摇~%@（分享自@宠物星球社交应用）", [NSString stringWithFormat:@"%@%@&SID=%@", SHAKESHAREAPI, self.pet_aid, [ControllerManager getSID]]];
+        NSString * str = [NSString stringWithFormat:@"你有事儿么？没事摇一摇~%@ #我是大萌星#", [NSString stringWithFormat:@"%@%@", SHAKESHAREAPI, self.pet_aid]];
         
         BOOL oauth = [UMSocialAccountManager isOauthAndTokenNotExpired:UMShareToSina];
         NSLog(@"%d", oauth);
@@ -657,7 +701,7 @@
                     floating2.frame = CGRectMake(23+self.distance, 90, 70, 25);
                     floating3.frame = CGRectMake(180+self.distance, 180, 70, 25);
                     self.timer = [NSTimer timerWithTimeInterval:0.02 target:self selector:@selector(floatingAnimation) userInfo:nil repeats:YES];
-                    timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%d",self.count] insertAtIndex:4];
+                    timesLabel.attributedText = [self firstString:@"今天还有次机会哦~" formatString:[NSString stringWithFormat:@"%ld",self.count] insertAtIndex:4];
                 }
             }
             ENDLOADING;
@@ -735,7 +779,7 @@
 //        NSLog(@"微博");
 //        NSString * str = nil;
 //        if (!self.isTrouble) {
-//            str = [NSString stringWithFormat:@"随便一摇就摇出了一个%@，好惊喜，你也想试试吗？http://home4pet.imengstar.com/（分享自@宠物星球社交应用）", self.giftName];
+//            str = [NSString stringWithFormat:@"随便一摇就摇出了一个%@，好惊喜，你也想试试吗？http://home4pet.imengstar.com/ #我是大萌星#", self.giftName];
 //        }else{
 //            str = [NSString stringWithFormat:@"嘿嘿~我在宠物星球捉弄了萌宠%@，恶作剧的感觉真是妙不可言~http://home4pet.imengstar.com/(分享自@宠物星球社交应用）", self.pet_name];
 //        }

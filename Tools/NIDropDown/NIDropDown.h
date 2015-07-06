@@ -24,7 +24,7 @@
 @property (nonatomic, assign) id <NIDropDownDelegate> delegate;
 
 -(void)hideDropDown:(UIButton *)b;
-- (id)showDropDown:(UIButton *)b:(CGFloat *)height:(NSArray *)arr;
+- (id)showDropDown:(UIButton *)b :(CGFloat *)height :(NSArray *)arr;
 -(void)setCellTextColor:(UIColor *)color Font:(UIFont *)font BgColor:(UIColor *)bgColor lineColor:(UIColor *)LineColor;
 -(void)setDefaultCellType;
 @end

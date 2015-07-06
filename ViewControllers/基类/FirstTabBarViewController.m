@@ -8,15 +8,18 @@
 
 #import "FirstTabBarViewController.h"
 
-#import "MyStarViewController.h"
+//#import "MyStarViewController.h"
 #import "FoodViewController.h"
 #import "DiscoveryViewController.h"
-#import "CenterViewController.h"
+//#import "CenterViewController.h"
 #import "SingleTalkModel.h"
 #import "EaseMob.h"
+#import "ChoosePicTypeViewController.h"
+#import "Mass_electionViewController.h"
+#import "PersonCenterViewController.h"
 
 @interface FirstTabBarViewController () <IChatManagerDelegate>
-
+//@property(nonatomic,retain)UIButton *camaraBtn;
 @end
 
 @implementation FirstTabBarViewController
@@ -24,25 +27,26 @@
 {
     [super viewWillAppear:animated];
     if (!isLoaded) {
-        if (![[USER objectForKey:@"guide_food"] intValue]) {
+        if (![[USER objectForKey:@"guide_handpick"] intValue]) {
             [self createGuide];
-            [USER setObject:@"1" forKey:@"guide_food"];
+            [USER setObject:@"1" forKey:@"guide_handpick"];
         }
         
         [self makeUI];
         [self modifyUI];
     }
     if (self.selectedIndex == 3) {
-        CenterViewController * vc4 = self.viewControllers[3];
-        [vc4 refresh];
-    }else if(self.selectedIndex == 0){
-        MyStarViewController * vc = self.viewControllers[0];
-        [vc.tv headerBeginRefreshing];
+        UINavigationController *nc4 = self.viewControllers[3];
+        PersonCenterViewController * vc4 = nc4.viewControllers[0];
+        [vc4 loadUserData];
+    }else if(self.selectedIndex == 1){
+//        Mass_electionViewController * vc = self.viewControllers[1];
+//        [vc.tv headerBeginRefreshing];
     }
     //
-    int a = [MyControl returnUnreadMessageCount];
+    NSInteger a = [MyControl returnUnreadMessageCount];
     if (a) {
-        self.msgNum.text = [NSString stringWithFormat:@"%d", a];
+        self.msgNum.text = [NSString stringWithFormat:@"%ld", a];
         self.msgNumBg.hidden = NO;
     }else{
         self.msgNum.text = @"0";
@@ -62,7 +66,10 @@
 }
 -(void)createGuide
 {
-    guide = [MyControl createImageViewWithFrame:[UIScreen mainScreen].bounds ImageName:@"guide2.png"];
+    guide = [MyControl createImageViewWithFrame:[UIScreen mainScreen].bounds ImageName:@"guide_handpick.png"];
+    if(self.view.frame.size.height <= 480){
+        guide.image = [UIImage imageNamed:@"guide_handpick_4s.png"];
+    }
     UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
     [guide addGestureRecognizer:tap];
     
@@ -82,9 +89,9 @@
 -(void)refreshMessageNum
 {
 //    [self getNewMessage];
-    int a = [MyControl returnUnreadMessageCount];
+    NSInteger a = [MyControl returnUnreadMessageCount];
     if (a) {
-        self.msgNum.text = [NSString stringWithFormat:@"%d", a];
+        self.msgNum.text = [NSString stringWithFormat:@"%ld", a];
         self.msgNumBg.hidden = NO;
     }else{
         self.msgNum.text = @"0";
@@ -98,11 +105,16 @@
     
     [self registerNotifications];
     
-    MyStarViewController * vc1 = [[MyStarViewController alloc] init];
-    FoodViewController * vc2 = [[FoodViewController alloc] init];
-    DiscoveryViewController * vc3 = [[DiscoveryViewController alloc] init];
-    CenterViewController * vc4 = [[CenterViewController alloc] init];
-    vc4.tabBar = self;
+    DiscoveryViewController * vc1 = [[DiscoveryViewController alloc] init];
+    Mass_electionViewController * vc2 = [[Mass_electionViewController alloc] init];
+    UINavigationController *nc2 = [[UINavigationController alloc] initWithRootViewController:vc2];
+    
+    FoodViewController * vc3 = [[FoodViewController alloc] init];
+    
+    PersonCenterViewController * vc4 = [[PersonCenterViewController alloc] init];
+    UINavigationController *nc4 = [[UINavigationController alloc] initWithRootViewController:vc4];
+    
+//    vc4.tabBar = self;
     //    tbc = [[UITabBarController alloc] init];
     
     self.talkIDArray = [NSMutableArray arrayWithCapacity:0];
@@ -111,14 +123,16 @@
     self.keysArray = [NSMutableArray arrayWithCapacity:0];
     self.valuesArray = [NSMutableArray arrayWithCapacity:0];
     
-    self.viewControllers = @[vc1, vc2, vc3, vc4];
-    self.selectedIndex = 1;
+    self.viewControllers = @[vc1, nc2, vc3, nc4];
+//    self.selectedIndex = 1;
     
     self.tabBar.hidden = YES;
     [vc1 release];
     [vc2 release];
     [vc3 release];
     [vc4 release];
+    [nc2 release];
+    [nc4 release];
     
     [self createBottom];
     //    NSArray * scArray = @[@"萌宠推荐", @"宇宙广场", @"星球关注"];
@@ -221,7 +235,7 @@
 {
     //界面上滑
     [UIView animateWithDuration:0.5 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        sv.contentOffset = CGPointMake(0, self.view.frame.size.height);
+        sv.contentOffset = CGPointMake(0, CGRectGetHeight(self.view.frame));
     } completion:^(BOOL finished) {
         sv.hidden = YES;
         [sv removeFromSuperview];
@@ -238,72 +252,170 @@
 #pragma mark -
 -(void)createBottom
 {
-    bottomBg = [MyControl createViewWithFrame:CGRectMake(0, self.view.frame.size.height-50, self.view.frame.size.width, 50)];
+    CGFloat spe = [UIScreen mainScreen].bounds.size.width/5.0;
+    //    140 101
+//    128*94
+    CGFloat cameraHeight = spe*99/128;
+    CGFloat bottomHeight = cameraHeight + 5;
+    CGFloat imageHeight = spe*80/128;
+    
+    
+    bottomBg = [MyControl createImageViewWithFrame:CGRectMake(0, self.view.frame.size.height-bottomHeight, self.view.frame.size.width, bottomHeight) ImageName:@"nav_bg.png"];
+//    [MyControl createViewWithFrame:CGRectMake(0, self.view.frame.size.height-bottomHeight, self.view.frame.size.width, cameraHeight+10)];
+//    bottomBg.backgroundColor = [UIColor colorWithRed:240/255.0 green:240/255.0 blue:240/255.0 alpha:1];
     [self.view addSubview:bottomBg];
     
-    NSArray * selectedArray = @[@"food_myStar_selected", @"food_beg_selected", @"food_discovery_selected", @"food_center_selected"];
-    NSArray * unSelectedArray = @[@"food_myStar_unSelected", @"food_beg_unSelected", @"food_discovery_unSelected", @"food_center_unSelected"];
+//    CGFloat navHeight = cameraHeight+10;
+//    UIImageView *navBg = [MyControl createImageViewWithFrame:CGRectMake(0, 0, WIDTH, navHeight) ImageName:@"nav_bg.png"];
+//    [bottomBg addSubview:navBg];
+    
+    NSArray * selectedArray = @[@"nav_1_1.png", @"nav_2_1.png", @"nav_3_0.png", @"nav_4_1.png", @"nav_5_1.png"];
+//  @[@"nav_mass_selected", @"nav_discover_selected", @"nav_camera_unSelected.png", @"nav_food_selected", @"nav_center_selected"];
+  
+  
+    NSArray * unSelectedArray = @[@"nav_1_0.png", @"nav_2_0.png", @"nav_3_0.png", @"nav_4_0.png", @"nav_5_0.png"];
+//  @[@"nav_mass_unSelected", @"nav_discover_unSelected", @"nav_camera_unSelected.png", @"nav_food_unSelected", @"nav_center_unSelected"];
+  
+  
+    
+//    CGFloat height = spe*5/7;
+//    CGFloat height = bottomHeight;
+    
+//    CGFloat circleWidth = 94/140.0*spe*0.9;
+    CGFloat ballWidth = WIDTH/5.0;
+    CGFloat ballHeight = imageHeight; //circleWidth*94/85
+    
     for (int i=0; i<selectedArray.count; i++) {
-        UIImageView * halfBall = [MyControl createImageViewWithFrame:CGRectMake(i*(self.view.frame.size.width/4.0), bottomBg.frame.size.height-50, self.view.frame.size.width/4.0, 50) ImageName:@"food_bottom_halfBall.png"];
-        [bottomBg addSubview:halfBall];
+//        UIImageView * halfBall = [MyControl createImageViewWithFrame:CGRectMake(i*spe, bottomBg.frame.size.height-height, spe, height) ImageName:@"food_bottom_halfBall.png"];
+//        [bottomBg addSubview:halfBall];
+//        halfBall.frame.origin.x+halfBall.frame.size.width/2.0-ballWidth/2.0
         
-        UIButton * ballBtn = [MyControl createButtonWithFrame:CGRectMake(halfBall.frame.origin.x+halfBall.frame.size.width/2.0-42.5/2.0, 2, 85/2.0, 94/2.0) ImageName:unSelectedArray[i] Target:self Action:@selector(ballBtnClick:) Title:nil];
+        UIButton * ballBtn = [MyControl createButtonWithFrame:CGRectMake(ballWidth*i, 12, ballWidth, ballHeight) ImageName:unSelectedArray[i] Target:self Action:@selector(ballBtnClick:) Title:nil];
         ballBtn.tag = 90+i;
         
-        [ballBtn setBackgroundImage:[UIImage imageNamed:selectedArray[i]] forState:UIControlStateSelected];
+        if(i != 2){
+            [ballBtn setBackgroundImage:[UIImage imageNamed:selectedArray[i]] forState:UIControlStateSelected];
+        }else{
+            [MyControl setOriginY:0 WithView:ballBtn];
+            [MyControl setHeight:cameraHeight WithView:ballBtn];
+        }
+        
         [bottomBg addSubview:ballBtn];
-        if (i == 1) {
+//        if (i == 2) {
+//            [ballBtn setBackgroundImage:[UIImage imageNamed:selectedArray[i]] forState:UIControlStateHighlighted];
+//        }
+        if (i == 0) {
             ballBtn.selected = YES;
         }
-        if (i == 3) {
-            self.msgNumBg = [MyControl createImageViewWithFrame:CGRectMake(ballBtn.frame.size.width-15, -5, 22, 22) ImageName:@"center_msgBg.png"];
+        if (i == 4) {
+            self.msgNumBg = [MyControl createImageViewWithFrame:CGRectMake(ballBtn.frame.size.width-22, -5, 22, 22) ImageName:@"center_msgBg.png"];
             self.msgNumBg.hidden = YES;
             [ballBtn addSubview:self.msgNumBg];
             
-            self.msgNum = [MyControl createLabelWithFrame:CGRectMake(-10, 0, 42, 22) Font:12 Text:@"50"];
+            self.msgNum = [MyControl createLabelWithFrame:CGRectMake(-10, 0, 42, 22) Font:12 Text:@"1"];
             self.msgNum.textAlignment = NSTextAlignmentCenter;
             [self.msgNumBg addSubview:self.msgNum];
         }
     }
     
+//    CGFloat addWidth = spe*0.1;
+//    _camaraBtn = [MyControl createButtonWithFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height-spe-addWidth, spe+addWidth, spe+addWidth) ImageName:@"bottom_camera.png" Target:self Action:@selector(camaraClick) Title:nil];
+//    [self.view addSubview:self.camaraBtn];
+    
     [self refreshMessageNum];
 }
--(void)ballBtnClick:(UIButton *)btn
+#pragma mark - 相机按钮
+-(void)camaraClick
 {
-//    [self ballAnimation:btn];
-
-    if (![[USER objectForKey:@"isSuccess"] intValue] && btn.tag == 90) {
+    if (![[USER objectForKey:@"isSuccess"] intValue]) {
         ShowAlertView;
         return;
     }
+    //判断有没有自己创建的宠物
+    BOOL hasMine = NO;
+    NSArray *array = [USER objectForKey:@"myPetsDataArray"];
+    for (NSDictionary *dict in array) {
+        if ([[dict objectForKey:@"master_id"] isEqualToString:[USER objectForKey:@"usr_id"]]) {
+            hasMine = YES;
+            break;
+        }
+    }
+    if (hasMine) {
+        ChoosePicTypeViewController *picVC = [[ChoosePicTypeViewController alloc] init];
+        [self presentViewController:picVC animated:YES completion:nil];
+        [picVC release];
+    }else{
+        //提示没有自己的宠物
+        Alert_2ButtonView2 *twoBtnView = [[Alert_2ButtonView2 alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        twoBtnView.type = 7;
+        [twoBtnView makeUI];
+        [self.view addSubview:twoBtnView];
+        
+        __block FirstTabBarViewController *blockSelf = self;
+        twoBtnView.createMyPetBlock = ^(){
+            //创建宠物
+            RegisterViewController * vc = [[RegisterViewController alloc] init];
+            vc.isOldUser = YES;
+            [blockSelf presentViewController:vc animated:YES completion:nil];
+            [vc release];
+        };
+        
+        [twoBtnView release];
+    }
+}
+
+#pragma mark -
+-(void)ballBtnClick:(UIButton *)btn
+{
+    if (btn.tag == 92) {
+        [self ballAnimation:btn];
+        [self camaraClick];
+        return;
+    }
+//    [self ballAnimation:btn];
+
+//    if (![[USER objectForKey:@"isSuccess"] intValue] && btn.tag == 91) {
+//        ShowAlertView;
+//        return;
+//    }
     
     [self refreshMessageNum];
-    NSLog(@"%d", self.selectedIndex);
-    if(btn.tag-90 != self.selectedIndex){
-        for (int i=0; i<4; i++) {
+//    NSLog(@"%d--%d", self.selectedIndex, btn.tag);
+//    if(btn.tag-90 != self.selectedIndex){
+        for (int i=0; i<5; i++) {
             //这里写button的直接父控件bottomBg再去找tag，不然会出问题
             UIButton * button = (UIButton *)[bottomBg viewWithTag:90+i];
             button.selected = NO;
         }
         
         btn.selected = YES;
-    }
+//    }
     
     //    NSLog(@"------%d", self.selectedIndex);
     if (btn.tag == 90) {
-        MyStarViewController * vc = self.viewControllers[0];
-        [vc.tv headerBeginRefreshing];
+        if(self.selectedIndex == btn.tag-90){
+            DiscoveryViewController * vc = self.viewControllers[0];
+            [vc refresh];
+        }
+        
     }else if (btn.tag == 91 && self.selectedIndex == 1) {
-        FoodViewController * vc = self.viewControllers[1];
+        UINavigationController *nc = self.viewControllers[1];
+        Mass_electionViewController * vc = nc.viewControllers[0];
         [vc loadData];
-    }else if(btn.tag == 92 && self.selectedIndex == 2){
-        DiscoveryViewController * vc = self.viewControllers[2];
-        [vc refresh];
-    }else if(btn.tag == 93 && self.selectedIndex == 3){
-        CenterViewController * vc = self.viewControllers[3];
-        [vc refresh];
+    }else if(btn.tag == 93 && self.selectedIndex == 2){
+        FoodViewController * vc = self.viewControllers[2];
+        [vc loadData];
+    }else if(btn.tag == 94 && self.selectedIndex == 3){
+        UINavigationController *nc = self.viewControllers[3];
+        PersonCenterViewController * vc = nc.viewControllers[0];
+        [vc loadUserData];
     }
-    self.selectedIndex = btn.tag-90;
+    if (btn.tag<92) {
+        self.selectedIndex = btn.tag-90;
+    }else if(btn.tag>92){
+        self.selectedIndex = btn.tag-90-1;
+    }
+    
     
     [self ballAnimation:btn];
     
@@ -316,7 +428,7 @@
     
     view.userInteractionEnabled = NO;
     [UIView animateWithDuration:0.1 animations:^{
-        view.frame = CGRectMake(rect.origin.x-rect.size.width*0.1, rect.origin.y, rect.size.width*1.2, rect.size.height);
+        view.frame = CGRectMake(rect.origin.x-rect.size.width*0.0, rect.origin.y, rect.size.width*1.0, rect.size.height);
     } completion:^(BOOL finished) {
         [UIView animateWithDuration:0.1 animations:^{
             view.frame = rect;
@@ -676,5 +788,34 @@
     // Pass the selected object to the new view controller.
 }
 */
-
+-(void)hideBottom
+{
+//    __block CGRect rectCamera = self.camaraBtn.frame;
+    __block CGRect rectBottom = bottomBg.frame;
+    __block FirstTabBarViewController *blockSelf = self;
+    [UIView animateWithDuration:0.2 animations:^{
+//        rectCamera.origin.y = HEIGHT;
+//        blockSelf.camaraBtn.frame = rectCamera;
+        
+        rectBottom.origin.y = HEIGHT;
+        blockSelf->bottomBg.frame = rectBottom;
+    }];
+//    self.camaraBtn.hidden = YES;
+//    bottomBg.hidden = YES;
+}
+-(void)showBottom
+{
+//    __block CGRect rectCamera = self.camaraBtn.frame;
+    __block CGRect rectBottom = bottomBg.frame;
+    __block FirstTabBarViewController *blockSelf = self;
+    [UIView animateWithDuration:0.2 animations:^{
+//        rectCamera.origin.y = HEIGHT-rectCamera.size.height;
+//        blockSelf.camaraBtn.frame = rectCamera;
+        
+        rectBottom.origin.y = HEIGHT-rectBottom.size.height;
+        blockSelf->bottomBg.frame = rectBottom;
+    }];
+//    self.camaraBtn.hidden = NO;
+//    bottomBg.hidden = NO;
+}
 @end

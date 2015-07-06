@@ -47,7 +47,7 @@
 //    protWebView.delegate = self;
     
     NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"aid=%@dog&cat", self.aid]];
-    if (!self.isFromBanner) {
+    if (!(self.isFromBanner || self.isFromMass || self.isFromCenterRank)) {
         self.URL = [NSString stringWithFormat:@"%@%@&sig=%@&SID=%@", HAVEFUNAPI, self.aid, sig, [ControllerManager getSID]];
     }
 //    else{
@@ -56,11 +56,11 @@
     
     NSLog(@"%@", self.URL);
     NSURL *url = nil;
-    if (self.isFromBanner) {
-        url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@&SID=%@", self.URL, [ControllerManager getSID]]];
-    }else{
+//    if (self.isFromBanner || ) {
+//        url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@&SID=%@", self.URL, [ControllerManager getSID]]];
+//    }else{
         url = [[NSURL alloc]initWithString:self.URL];
-    }
+//    }
 //    NSLog(@"%@--%@", self.URL, url);
     [protWebView loadRequest:[NSURLRequest requestWithURL:url]];
     [url release];
@@ -85,8 +85,8 @@
     [navView addSubview:backBtn];
     
     UILabel * titleLabel = [MyControl createLabelWithFrame:CGRectMake(60, 64-20-12, 200, 20) Font:17 Text:@"游乐园"];
-    if (self.isFromBanner) {
-        titleLabel.text = @"宠物星球";
+    if (self.isFromBanner || self.isFromMass || self.isFromCenterRank) {
+        titleLabel.text = @"我是大萌星";
     }
     
     titleLabel.font = [UIFont boldSystemFontOfSize:17];
@@ -96,11 +96,13 @@
 //    UIImageView * searchImageView = [MyControl createImageViewWithFrame:CGRectMake(320-50-10, 33, 100/2, 56/2) ImageName:@"inviteBtn.png"];
 //    [navView addSubview:searchImageView];
     
-    UIButton * shareBtn = [MyControl createButtonWithFrame:CGRectMake(320-50-10, 33-5, 100/2, 56/2) ImageName:@"inviteBtn.png" Target:self Action:@selector(shareBtnClick) Title:@"分享"];
-    //    searchBtn.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.5];
-    shareBtn.titleLabel.font = [UIFont systemFontOfSize:13];
-    shareBtn.showsTouchWhenHighlighted = YES;
-    [navView addSubview:shareBtn];
+    if(!self.isFromCenterRank){
+        UIButton * shareBtn = [MyControl createButtonWithFrame:CGRectMake(320-50-10, 33-5, 100/2, 56/2) ImageName:@"inviteBtn.png" Target:self Action:@selector(shareBtnClick) Title:@"分享"];
+        //    searchBtn.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.5];
+        shareBtn.titleLabel.font = [UIFont systemFontOfSize:13];
+        shareBtn.showsTouchWhenHighlighted = YES;
+        [navView addSubview:shareBtn];
+    }
     
 //    UIView * line0 = [MyControl createViewWithFrame:CGRectMake(0, 63, 320, 1)];
 //    line0.backgroundColor = [UIColor colorWithWhite:0.4 alpha:0.1];
@@ -108,7 +110,7 @@
 }
 -(void)shareBtnClick
 {
-    if (self.isFromBanner) {
+    if (self.isFromBanner || self.isFromMass) {
         if (!isMoreCreated) {
             //create more
             isMoreCreated = YES;
@@ -228,6 +230,13 @@
     [self.view addSubview:imageView];
 //    [MobClick event:@"photo_share"];
     
+    NSURL *url = nil;
+    if (self.isFromMass) {
+        url = [NSURL URLWithString:self.icon];
+    }else{
+        url = [NSURL URLWithString:[NSString stringWithFormat:@"%@banner/%@", IMAGEURL, self.icon]];
+    }
+    
     if(button.tag == 200){
         NSLog(@"微信");
         //强制分享图片
@@ -235,7 +244,7 @@
         [UMSocialData defaultData].extConfig.wechatSessionData.url = self.URL;
         [UMSocialData defaultData].extConfig.wechatSessionData.title = self.share_title;
         
-        [imageView setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@banner/%@", IMAGEURL, self.icon]] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+        [imageView setImageWithURL:url completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
             if (image) {
                 [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:self.share_des image:image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
                     
@@ -257,7 +266,7 @@
         [UMSocialData defaultData].extConfig.wechatTimelineData.url = self.URL;
         [UMSocialData defaultData].extConfig.wechatTimelineData.title = self.share_title;
 //        NSLog(@"%@", [NSString stringWithFormat:@"%@banner/%@", IMAGEURL, self.icon]);
-        [imageView setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@banner/%@", IMAGEURL, self.icon]] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+        [imageView setImageWithURL:url completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
             if (image) {
                 [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:nil image:image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
                     if (response.responseCode == UMSResponseCodeSuccess) {
@@ -274,9 +283,9 @@
         }];
     }else if(button.tag == 202){
         NSLog(@"微博");
-        NSString * str = [NSString stringWithFormat:@"%@%@（分享自@宠物星球社交应用）", self.share_des, self.URL];
+        NSString * str = [NSString stringWithFormat:@"%@%@ #我是大萌星#", self.share_des, self.URL];
         
-        [imageView setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@banner/%@", IMAGEURL, self.icon]] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+        [imageView setImageWithURL:url completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
             if (image) {
                 BOOL oauth = [UMSocialAccountManager isOauthAndTokenNotExpired:UMShareToSina];
                 NSLog(@"%d", oauth);

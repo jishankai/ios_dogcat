@@ -152,7 +152,7 @@
 //        [self presentViewController:vc animated:YES completion:nil];
 //        [vc release];
     };
-    cell.pBtnClick = ^(int a, NSString * aid){
+    cell.pBtnClick = ^(NSInteger a, NSString * aid){
         if (![[USER objectForKey:@"isSuccess"] intValue]) {
             ShowAlertView;
             return;
@@ -169,7 +169,7 @@
                 if (isFinish) {
                     NSArray * array = [load.dataDict objectForKey:@"data"];
                     if (array.count >= 10) {
-                        int cost = array.count*5;
+                        int cost = (int)array.count*5;
                         if (cost>100) {
                             cost = 100;
                         }
@@ -191,13 +191,13 @@
 //                        [oneBtn makeUI];
 //                        [oneBtn release];
                         oneBtn.type = 2;
-                        oneBtn.petsNum = array.count;
+                        oneBtn.petsNum = (int)array.count;
                         [oneBtn makeUI];
                         [[UIApplication sharedApplication].keyWindow addSubview:oneBtn];
                         [oneBtn release];
                     }else{
                         oneBtn.type = 2;
-                        oneBtn.petsNum = array.count;
+                        oneBtn.petsNum = (int)array.count;
                         [oneBtn makeUI];
                         [[UIApplication sharedApplication].keyWindow addSubview:oneBtn];
                         [oneBtn release];
@@ -217,7 +217,7 @@
                                 NSLog(@"加入成功数据：%@",load.dataDict);
                                 if ([[load.dataDict objectForKey:@"data"] objectForKey:@"isSuccess"]) {
                                     if (array.count>=10) {
-                                        int cost = array.count*5;
+                                        int cost = (int)array.count*5;
                                         if (cost>100) {
                                            [USER setObject:[NSString stringWithFormat:@"%d", [[USER objectForKey:@"gold"] intValue]-100] forKey:@"gold"];
                                         }else{
@@ -260,7 +260,7 @@
             [buttonView2 makeUI];
             buttonView2.quit = ^(){
                 NSLog(@"quit");
-                [self loadMyCountryInfoData:aid btn:cell.pBtn Row:indexPath.row];
+                [self loadMyCountryInfoData:aid btn:cell.pBtn Row:(int)indexPath.row];
             };
             [[UIApplication sharedApplication].keyWindow addSubview:buttonView2];
             [buttonView2 release];
@@ -272,8 +272,8 @@
 //            };
         }
     };
-    cell.imageClick = ^(int a){
-        NSLog(@"跳转到第%d张图片详情页", a);
+    cell.imageClick = ^(NSInteger a){
+        NSLog(@"跳转到第%ld张图片详情页", a);
         FrontImageDetailViewController * vc = [[FrontImageDetailViewController alloc] init];
         vc.img_id = [[[self.dataArray[indexPath.row] images] objectAtIndex:a] objectForKey:@"img_id"];
         NSString * name = [model.images[a] objectForKey:@"url"];
@@ -287,7 +287,7 @@
     cell.selectionStyle = 0;
     return cell;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 300.0f;
 }

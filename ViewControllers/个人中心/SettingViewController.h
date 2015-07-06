@@ -23,6 +23,7 @@
     
     BOOL isConfVersion;
     UISwitch * _switch;
+    UISwitch * voteSwitch;
 }
 @property(nonatomic,retain)UIImageView * bgImageView;
 

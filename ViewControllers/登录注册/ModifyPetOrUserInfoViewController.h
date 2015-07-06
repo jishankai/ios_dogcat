@@ -81,8 +81,8 @@
 
 @property (nonatomic,copy)NSString * name;
 @property (nonatomic,copy)NSString * u_name;
-@property (nonatomic)int u_gender;
-@property (nonatomic)int u_city;
+@property (nonatomic)NSInteger u_gender;
+@property (nonatomic)NSInteger u_city;
 
 @property (nonatomic,retain)PetInfoModel * petInfoModel;
 

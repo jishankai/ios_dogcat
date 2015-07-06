@@ -7,7 +7,6 @@
 //
 
 #import "RegisterViewController.h"
-#import "RandomViewController.h"
 #import "MyMD5.h"
 #import "OpenUDID.h"
 #import "ASIFormDataRequest.h"
@@ -164,7 +163,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
                 [self.otherArray addObject:str];
             }
             self.tempArray = self.catArray;
-            count = self.catArray.count;
+            count = (int)self.catArray.count;
     if (!self.isModify){
         [self createUI];
         [self createFakeNavigation];
@@ -421,8 +420,8 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         }else{
             UIView * keyboardBgView = [MyControl createViewWithFrame:CGRectMake(0, 0, 320, 40)];
             keyboardBgView.backgroundColor = [UIColor colorWithRed:220/255.0 green:220/255.0 blue:220/255.0 alpha:1];
-            UIButton * finishButton2 = [MyControl createButtonWithFrame:CGRectMake(320-70, 5, 50, 30) ImageName:@"" Target:self Action:@selector(finish2ButtonClick) Title:@"完成"];
-            [keyboardBgView addSubview:finishButton2];
+//            UIButton * finishButton2 = [MyControl createButtonWithFrame:CGRectMake(320-70, 5, 50, 30) ImageName:@"" Target:self Action:@selector(finish2ButtonClick) Title:@"完成"];
+//            [keyboardBgView addSubview:finishButton2];
 
             ageTextField = [MyControl createTextFieldWithFrame:CGRectMake(40, 5, 140, 20) placeholder:@"请输入爱宠的年龄" passWord:NO leftImageView:nil rightImageView:nil Font:13];
             ageTextField.delegate = self;
@@ -572,13 +571,13 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         tfCity.userInteractionEnabled = NO;
     }else if([[USER objectForKey:@"weChatUserInfo"] isKindOfClass:[NSDictionary class]]){
         //微信
-        tfUserName.text = [[USER objectForKey:@"weChatUserInfo"]  objectForKey:@"screen_name"];
-        [photoButton2 setBackgroundImageWithURL:[NSURL URLWithString:[[USER objectForKey:@"weChatUserInfo"]  objectForKey:@"profile_image_url"]] forState:UIControlStateNormal completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+        tfUserName.text = [[USER objectForKey:@"weChatUserInfo"]  objectForKey:@"nickname"];
+        [photoButton2 setBackgroundImageWithURL:[NSURL URLWithString:[[USER objectForKey:@"weChatUserInfo"]  objectForKey:@"headimgurl"]] forState:UIControlStateNormal completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
             if (image) {
                 self.oriUserImage = image;
             }
         }];
-        if ([[[USER objectForKey:@"weChatUserInfo"] objectForKey:@"gender"] intValue] == 1) {
+        if ([[[USER objectForKey:@"weChatUserInfo"] objectForKey:@"sex"] intValue] == 1) {
             woman.backgroundColor = [UIColor whiteColor];
             man.backgroundColor = BGCOLOR;
         }
@@ -857,33 +856,33 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
                 typeTag = 1;
                 
                 self.tempArray = self.catArray;
-                count = self.catArray.count;
+                count = (int)self.catArray.count;
                 if (num<self.catArray.count) {
                     self.detailName = self.catArray[num];
                 }else{
-                    num = self.catArray.count-1;
+                    num = (int)self.catArray.count-1;
                     self.detailName = self.catArray[self.catArray.count-1];
                 }
             }else if(row == 1){
                 typeTag = 2;
                 
                 self.tempArray = self.dogArray;
-                count = self.dogArray.count;
+                count = (int)self.dogArray.count;
                 if (num<self.dogArray.count) {
                     self.detailName = self.dogArray[num];
                 }else{
-                    num = self.dogArray.count-1;
+                    num = (int)self.dogArray.count-1;
                     self.detailName = self.dogArray[self.dogArray.count-1];
                 }
             }else{
                 typeTag = 3;
                 
                 self.tempArray = self.otherArray;
-                count = self.otherArray.count;
+                count = (int)self.otherArray.count;
                 if (num<self.otherArray.count) {
                     self.detailName = self.otherArray[num];
                 }else{
-                    num = self.otherArray.count-1;
+                    num = (int)self.otherArray.count-1;
                     self.detailName = self.otherArray[self.otherArray.count-1];
                 }
             }
@@ -891,14 +890,14 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
             [picker reloadComponent:1];
         }else{
             self.detailName = self.tempArray[row];
-            num = row;
+            num = (int)row;
         }
     }else if(pickerView == picker2){
         //picker2
         if (component == PROVINCE_COMPONENT) {
             selectedProvince = [province objectAtIndex: row];
             //取出省
-            NSDictionary *tmp = [NSDictionary dictionaryWithDictionary: [areaDic objectForKey: [NSString stringWithFormat:@"%d", row]]];
+            NSDictionary *tmp = [NSDictionary dictionaryWithDictionary: [areaDic objectForKey: [NSString stringWithFormat:@"%ld", row]]];
             NSDictionary *dic = [NSDictionary dictionaryWithDictionary: [tmp objectForKey: selectedProvince]];
             //取出城市
             NSArray *cityArray = [dic allKeys];
@@ -969,9 +968,9 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         }
     }else if(pickerView == picker3){
         if (component == 0) {
-            year = row;
+            year = (int)row;
         }else{
-            month = row;
+            month = (int)row;
         }
     }
     
@@ -996,9 +995,9 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         }
     }else{
         if (component == 0) {
-            return [NSString stringWithFormat:@"%d 岁", row];
+            return [NSString stringWithFormat:@"%ld 岁", row];
         }else{
-            return [NSString stringWithFormat:@"%d 个月", row];
+            return [NSString stringWithFormat:@"%ld 个月", row];
         }
     }
     
@@ -1200,6 +1199,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         [self userRegister];
     }
     
+//    [self createCountry];
 
     //跳到主页
 //    JDSideMenu * sideMenu = [ControllerManager shareJDSideMenu];
@@ -1214,13 +1214,39 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
     
     NSString * url = [NSString stringWithFormat:@"%@&age=%d&gender=%d&name=%@&type=%d&sig=%@&SID=%@", CREATECOUNTRY, age, gender, [self.name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], type, [MyMD5 md5:code], [ControllerManager getSID]];
     NSLog(@"%@", url);
+//    self.dictData = nil;
+//    AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc]init];
+//    
+//    [manager GET:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//        if (self.oriImage) {
+//            [self postImage];
+//        }else{
+//            LOADPETLIST;
+//            self.isOldUserTxOK = YES;
+//        }
+////
+//        if ([[self.dictData objectForKey:@"data"] isKindOfClass:[NSDictionary class]]) {
+//            [USER setObject:[[self.dictData objectForKey:@"data"] objectForKey:@"aid"] forKey:@"aid"];
+//            //                NSLog(@"%@",[[[load.dataDict objectForKey:@"data"] objectForKey:@"aid"] forKey:@"aid"]);
+//            [self loadPetInfo];
+//        }
+//
+//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//        LOADFAILED;
+//    }];
+    
     httpDownloadBlock * request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock * load) {
+        NSLog(@"%d",isFinish);
         if (isFinish) {
-            NSLog(@"%@", load.dataDict);
+            NSLog(@"load.dataDict:%@", load.dataDict);
             ENDLOADING;
             
             if (self.oriImage) {
-                [self postImage];
+                if ([[load.dataDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]]) {
+                    //5.6 先修改aid，再传头像；
+                    [USER setObject:[[load.dataDict objectForKey:@"data"] objectForKey:@"aid"] forKey:@"aid"];
+                    [self postImage];
+                }
             }else{
                 LOADPETLIST;
                 self.isOldUserTxOK = YES;
@@ -1228,7 +1254,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
             
             if ([[load.dataDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]]) {
                 [USER setObject:[[load.dataDict objectForKey:@"data"] objectForKey:@"aid"] forKey:@"aid"];
-                
+//                NSLog(@"%@",[[[load.dataDict objectForKey:@"data"] objectForKey:@"aid"] forKey:@"aid"]);
                 [self loadPetInfo];
             }
             
@@ -1632,7 +1658,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
 {
     NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"usr_id=%@dog&cat", [USER objectForKey:@"usr_id"]]];
     NSString * url = [NSString stringWithFormat:@"%@%@&sig=%@&SID=%@", USERINFOAPI, [USER objectForKey:@"usr_id"], sig,[ControllerManager getSID]];
-    NSLog(@"%@", url);
+    NSLog(@"loadUserInfo:%@", url);
     httpDownloadBlock * request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock * load) {
         if (isFinish) {
             [USER setObject:[load.dataDict objectForKey:@"confVersion"] forKey:@"confVersion"];
@@ -1793,7 +1819,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
     //网络上传
     NSString * code = [NSString stringWithFormat:@"aid=%@dog&cat", [USER objectForKey:@"aid"]];
     NSString * url = [NSString stringWithFormat:@"%@%@&sig=%@&SID=%@", PETTXAPI, [USER objectForKey:@"aid"], [MyMD5 md5:code], [ControllerManager getSID]];
-    NSLog(@"%@--%@", code, url);
+    NSLog(@"宠物头像上传:%@--%@", code, url);
     _request = [[ASIFormDataRequest alloc] initWithURL:[NSURL URLWithString:url]];
     _request.requestMethod = @"POST";
     _request.timeOutSeconds = 30;
@@ -1816,6 +1842,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
 //    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
 }
+//
 -(void)postUserImage
 {
     //网络上传
@@ -2039,8 +2066,8 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
     }else if([provinceStr isEqualToString: cityStr]){
         cityStr = @"";
     }
-    NSLog(@"------------%d", (provinceIndex+10)*100+cityIndex);
-    self.u_city = (provinceIndex+10)*100+cityIndex;
+    NSLog(@"------------%ld", (provinceIndex+10)*100+cityIndex);
+    self.u_city = (int)(provinceIndex+10)*100+(int)cityIndex;
     NSString *showMsg = [NSString stringWithFormat: @"%@%@", provinceStr, cityStr];
     tfCity.text = showMsg;
     

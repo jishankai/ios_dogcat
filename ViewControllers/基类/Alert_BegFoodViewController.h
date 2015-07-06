@@ -19,4 +19,8 @@
 
 @property(nonatomic)NSInteger is_food;
 
+@property(nonatomic)BOOL isFromMasselection;
+@property(nonatomic,copy)NSString * img_id;
+@property(nonatomic,copy)NSString * massName;
+@property(nonatomic,copy)UIImage * oriImage;
 @end

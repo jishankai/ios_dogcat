@@ -29,10 +29,18 @@
     // Do any additional setup after loading the view.
     self.topicNameArray = [NSMutableArray arrayWithCapacity:0];
     self.topicIdArray = [NSMutableArray arrayWithCapacity:0];
+    self.topicArray = [NSMutableArray arrayWithCapacity:0];
+    //5.6 读取本地话题
+    NSString *libPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *theme = [libPath stringByAppendingPathComponent:@"theme"];
+    NSArray *data = [NSArray arrayWithContentsOfFile:theme];
+    if (data.count != 0) {
+        [self.topicArray addObjectsFromArray:data];
+    }
     
     [self createBg];
     [self createFakeNavigation];
-    [self loadTopicData];
+//    [self loadTopicData];
     [self createHeader];
     [self createTableView];
     
@@ -65,13 +73,13 @@
     self.bgImageView = [MyControl createImageViewWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) ImageName:@"blurBg.jpg"];
     [self.view addSubview:self.bgImageView];
     
-//    NSString * docDir = DOCDIR;
-//    NSString * filePath = BLURBG;
-//    
-//    NSData * data = [NSData dataWithContentsOfFile:filePath];
-//    
-//    UIImage * image = [UIImage imageWithData:data];
-//    self.bgImageView.image = image;
+    //    NSString * docDir = DOCDIR;
+    //    NSString * filePath = BLURBG;
+    //
+    //    NSData * data = [NSData dataWithContentsOfFile:filePath];
+    //
+    //    UIImage * image = [UIImage imageWithData:data];
+    //    self.bgImageView.image = image;
     UIView * tempView = [MyControl createViewWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
     tempView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
     [self.view addSubview:tempView];
@@ -114,10 +122,10 @@
     [headerView addSubview:alphaView];
     
     //
-//    UIView * redView = [MyControl createViewWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 1)];
-//    redView.backgroundColor = [UIColor redColor];
-//    redView.alpha = 0.2;
-//    [headerView addSubview:redView];
+    //    UIView * redView = [MyControl createViewWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 1)];
+    //    redView.backgroundColor = [UIColor redColor];
+    //    redView.alpha = 0.2;
+    //    [headerView addSubview:redView];
     
     //
     UIImageView * searchBg = [MyControl createImageViewWithFrame:CGRectMake(10, 5, 300, 25) ImageName:@""];
@@ -146,8 +154,8 @@
     tv.separatorStyle = 0;
     [self.view addSubview:tv];
     
-//    UIView * view = [MyControl createViewWithFrame:CGRectMake(0, 0, 320, 64+35)];
-//    tv.tableHeaderView = view;
+    //    UIView * view = [MyControl createViewWithFrame:CGRectMake(0, 0, 320, 64+35)];
+    //    tv.tableHeaderView = view;
 }
 
 #pragma mark - 点击事件
@@ -159,13 +167,25 @@
 -(void)rightButtonClick
 {
     NSLog(@"确定");
-//    NSLog(@"%@", [tf.text class]);
     if (tf.text == nil || [tf.text isEqualToString:@""]) {
         StartLoading;
         [MyControl loadingFailedWithContent:@"话题为空" afterDelay:0.5];
     }else{
         [USER setObject:@"1" forKey:@"selectTopic"];
         [USER setObject:tf.text forKey:@"topic"];
+        //5.6 本地保存话题
+        NSString *libPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+        NSString *theme = [libPath stringByAppendingPathComponent:@"theme"];
+        for (int i = 0; i<self.topicArray.count; i++) {
+            if (![tf.text isEqualToString:self.topicArray[i]]) {
+                [self.topicArray addObject:tf.text];
+            }
+//        [self.topicArray addObject:tf.text];
+        [self.topicArray writeToFile:theme atomically:YES];
+//        for (int i = 0; i<self.topicArray.count; i++) {
+//            NSLog(@"%@",self.topicArray[i]);
+        }
+        
         [tf resignFirstResponder];
         [self dismissViewControllerAnimated:YES completion:nil];
     }
@@ -174,7 +194,8 @@
 #pragma mark - tableView代理
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.topicNameArray.count;
+//    return self.topicNameArray.count;
+    return self.topicArray.count;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -183,11 +204,14 @@
     if (!cell) {
         cell = [[[topicCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID] autorelease];
     }
-    if ([self.topicIdArray[indexPath.row] intValue]) {
-        [cell modifyWithName:self.topicNameArray[indexPath.row] isActivity:YES];
-    }else{
-        [cell modifyWithName:self.topicNameArray[indexPath.row] isActivity:NO];
-    }
+//    if ([self.topicIdArray[indexPath.row] intValue]) {
+//        [cell modifyWithName:self.topicNameArray[indexPath.row] isActivity:YES];
+//        [cell modifyWithName:self.topicArray[indexPath.row] isActivity:YES];
+//    }else{
+//        [cell modifyWithName:self.topicNameArray[indexPath.row] isActivity:NO];
+        [cell modifyWithName:self.topicArray[indexPath.row] isActivity:NO];
+
+//    }
     
     cell.selectionStyle = 0;
     cell.backgroundColor = [UIColor clearColor];
@@ -195,8 +219,10 @@
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"选择了第%d个", indexPath.row);
-    tf.text = self.topicNameArray[indexPath.row];
+    NSLog(@"选择了第%ld个", indexPath.row);
+//    tf.text = self.topicNameArray[indexPath.row];
+    tf.text = self.topicArray[indexPath.row];
+
 }
 
 #pragma mark - textField
@@ -217,14 +243,14 @@
 }
 
 /*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+ {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
 
 @end

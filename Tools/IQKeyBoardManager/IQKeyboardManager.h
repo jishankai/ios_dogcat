@@ -31,6 +31,13 @@
 
 	@const IQAutoToolbarByTag Creates Toolbar according to tag property of TextField's.
  */
+@protocol keyboardHideDelegate <NSObject>
+
+-(void)IQKeyboardHide;
+@end
+
+
+
 typedef enum IQAutoToolbarManageBehaviour
 {
 	IQAutoToolbarBySubviews,
@@ -50,6 +57,8 @@ typedef enum IQAutoToolbarManageBehaviour
 	@abstract Keyboard TextField/TextView Manager
  */
 @interface IQKeyboardManager : NSObject
+
+@property (nonatomic,assign) id<keyboardHideDelegate> delegate;
 
 /*!
 	@property keyboardDistanceFromTextField

@@ -430,6 +430,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    NSLog(@"%ld",self.dataSource.count);
     return self.dataSource.count;
 }
 
@@ -459,7 +460,7 @@
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
             }
             cell.messageModel = model;
-//            NSLog(@"%@", cell.messageModel.message.ext);
+//            NSLog(@"pppppppppp%@", cell.messageModel.message.ext);
             
             __block ChatViewController * blockSelf = self;
             cell.userBlock = ^(NSString * usr_id){
@@ -486,6 +487,7 @@
                 if (type == 1) {
                     //照片详情
                     FrontImageDetailViewController * vc = [[FrontImageDetailViewController alloc] init];
+                    vc.showBackIndex = 3;
                     vc.img_id = [dict objectForKey:@"img_id"];
 //                    vc.isFromKey = YES;
 //                    [[UIApplication sharedApplication].keyWindow addSubview:vc.view];
@@ -815,6 +817,8 @@
 -(void)didReceiveMessage:(EMMessage *)message
 {
     if ([_conversation.chatter isEqualToString:message.conversationChatter]) {
+//        [[EaseMob sharedInstance].deviceManager asyncPlayNewMessageSound];
+//        [[EaseMob sharedInstance].deviceManager asyncPlayVibration];
         [self addMessage:message];
         [_messages addObject:message];
     }

@@ -12,7 +12,7 @@
 @interface PetMain_FoodCell : UITableViewCell
 {
     UIImageView * headImage;
-    UILabel * desLabel;
+    HMEmotionTextView * desLabel;
     UILabel * foodNum;
     UILabel * timeLabel;
     UIView * rewardBg;

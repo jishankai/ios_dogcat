@@ -34,6 +34,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    self.navigationController.navigationBarHidden = YES;
     
 //    if ([[USER objectForKey:@"confVersion"] isEqualToString:@"1.0"]) {
 //        isConfVersion = YES;
@@ -44,12 +45,12 @@
 //        self.arr3 = @[@"清除缓存", @"常见问题", @"意见反馈", @"关于我们"];
 //    }else{
 //        self.arr1 = @[@"收货地址", @"填写邀请码", @"设置最爱萌星", @"解除黑名单", @"绑定新浪微博"];
-        self.arr3 = @[@"清除缓存", @"打赏提示", @"常见问题", @"意见反馈", @"关于我们"];
+        self.arr3 = @[@"清除缓存", @"打赏提示", @"投票提示", @"常见问题", @"意见反馈", @"关于我们"];
 //    }
     
 //    self.arr2 = @[@"新浪微博", @"微信朋友圈"];
     
-    
+    [ControllerManager hideTabBar];
     [self createBg];
     [self createTableView];
     [self createFakeNavigation];
@@ -141,7 +142,8 @@
 }
 -(void)backBtnClick:(UIButton *)button
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self.navigationController popToRootViewControllerAnimated:YES];
+//    [self dismissViewControllerAnimated:YES completion:nil];
 //    button.selected = !button.selected;
 //    JDSideMenu * menu = [ControllerManager shareJDSideMenu];
 //    if (button.selected) {
@@ -255,6 +257,16 @@
             }else{
                 _switch.on = YES;
             }
+        }else if(indexPath.row == 2){
+            //投票switch
+            voteSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(self.view.frame.size.width-50-20, 7, 0, 0)];
+            [voteSwitch addTarget:self action:@selector(switchChanged:) forControlEvents:UIControlEventValueChanged];
+            [cell addSubview:voteSwitch];
+            if ([[USER objectForKey:@"notShowVoteCostAlert"] intValue] == 1) {
+                voteSwitch.on = NO;
+            }else{
+                voteSwitch.on = YES;
+            }
         }
         cell.textLabel.text =[NSString stringWithFormat:@"     %@",self.arr3[indexPath.row]];
         cell.textLabel.textColor = [UIColor blackColor];
@@ -266,11 +278,20 @@
 }
 -(void)switchChanged:(UISwitch *)sw
 {
-    if (sw.on) {
-        [USER setObject:@"1" forKey:@"showCostAlert"];
-    }else{
-        [USER setObject:@"0" forKey:@"showCostAlert"];
+    if (sw == _switch) {
+        if (sw.on) {
+            [USER setObject:@"1" forKey:@"showCostAlert"];
+        }else{
+            [USER setObject:@"0" forKey:@"showCostAlert"];
+        }
+    }else if(sw == voteSwitch){
+        if (sw.on) {
+            [USER setObject:@"0" forKey:@"notShowVoteCostAlert"];
+        }else{
+            [USER setObject:@"1" forKey:@"notShowVoteCostAlert"];
+        }
     }
+    
 }
 //设置箭头和初始化cell
 - (void)normalCell:(UITableViewCell *)cell arrow:(NSIndexPath *)indexPath
@@ -284,7 +305,7 @@
 //        a = 4;
 //    }
 //    if((indexPath.section == 0 && indexPath.row != a) ||(indexPath.section == 2 && indexPath.row != 0)){
-    if (indexPath.row > 1) {
+    if (indexPath.row > 2) {
         arrow = [MyControl createImageViewWithFrame:CGRectMake(570/2, 10, 20, 20) ImageName:@"14-6-2.png"];
         //        [cell addSubview:arrow];
         cell.accessoryView = arrow;
@@ -402,7 +423,9 @@
 //            [ControllerManager setSID:@""];
 //            StartLoading;
 //            [MMProgressHUD dismissWithSuccess:@"重置成功" title:nil afterDelay:0.5f];
-        }if(indexPath.row == 2){
+        }else if(indexPath.row == 2){
+        
+        }else if(indexPath.row == 3){
 //            if (isConfVersion) {
 //                FeedbackViewController *feedBackVC = [[FeedbackViewController alloc] init];
 //                [self presentViewController:feedBackVC animated:YES completion:^{
@@ -410,11 +433,12 @@
 //                }];
 //            }else{
                 FAQViewController * vc = [[FAQViewController alloc] init];
-                [self presentViewController:vc animated:YES completion:nil];
+            [self.navigationController pushViewController:vc animated:YES];
+//                [self presentViewController:vc animated:YES completion:nil];
                 [vc release];
 //            }
             
-        }else if (indexPath.row == 3) {
+        }else if (indexPath.row == 4) {
 //            AboutViewController * vc = [[AboutViewController alloc] init];
 //            [self presentViewController:vc animated:YES completion:nil];
 //            [vc release];
@@ -422,15 +446,17 @@
 //                //好评
 //            }else{
                 FeedbackViewController *feedBackVC = [[FeedbackViewController alloc] init];
-                [self presentViewController:feedBackVC animated:YES completion:^{
-                    [feedBackVC release];
-                }];
+            [self.navigationController pushViewController:feedBackVC animated:YES];
+            [feedBackVC release];
+//                [self presentViewController:feedBackVC animated:YES completion:^{
+//                    [feedBackVC release];
+//                }];
 //            }
-        }
-        else if (indexPath.row == 4){
+        }else if (indexPath.row == 5){
 //            if (isConfVersion) {
                 AboutViewController * vc = [[AboutViewController alloc] init];
-                [self presentViewController:vc animated:YES completion:nil];
+            [self.navigationController pushViewController:vc animated:YES];
+//                [self presentViewController:vc animated:YES completion:nil];
                 [vc release];
 //            }else{
 //                //好评

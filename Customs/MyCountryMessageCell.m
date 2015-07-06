@@ -139,13 +139,15 @@
         typeImageView.image = [UIImage imageNamed:@"myCountry_gift.png"];
         
         //body
+        GiftsModel *giftModel = [ControllerManager returnGiftsModelWithGiftId:[model.content objectForKey:@"item_id"]];
+        
         NSString * str1 = [ControllerManager returnPositionWithRank:[model.content objectForKey:@"rank"]];
         NSString * str2 = [model.content objectForKey:@"u_name"];
         NSString * str3 = petName;
-        NSString * str4 = [[ControllerManager returnGiftDictWithItemId:[model.content objectForKey:@"item_id"]] objectForKey:@"name"];
+        NSString * str4 = giftModel.name;
 //        NSString * str4 = [model.content objectForKey:@"item_name"];
         NSString * str5 = [NSString stringWithFormat:@"+%@", [model.content objectForKey:@"rq"]];
-        NSString * str6 = [ControllerManager returnActionStringWithItemId:[model.content objectForKey:@"item_id"]];
+        NSString * str6 = giftModel.effect_des;
         
         NSString * bodyStr = [NSString stringWithFormat:@"%@— %@ 精心挑选了一个 %@ 送给 %@, %@ %@ 人气 %@", str1, str2, str4, str3, str3, str6, str5];
         NSMutableAttributedString * str = [[NSMutableAttributedString alloc] initWithString:bodyStr];
@@ -217,12 +219,13 @@
     }else{
         //扔炸弹 -人气
         typeImageView.image = [UIImage imageNamed:@"myCountry_trouble.png"];
+        GiftsModel *giftModel = [ControllerManager returnGiftsModelWithGiftId:[model.content objectForKey:@"item_id"]];
         
         NSString * str1 = [model.content objectForKey:@"u_name"];
         NSString * str2 = petName;
-        NSString * str3 = [[ControllerManager returnGiftDictWithItemId:[model.content objectForKey:@"item_id"]] objectForKey:@"name"];
+        NSString * str3 = giftModel.name;
         NSString * str4 = [NSString stringWithFormat:@"%@", [model.content objectForKey:@"rq"]];
-        NSString * str5 = [ControllerManager returnActionStringWithItemId:[model.content objectForKey:@"item_id"]];
+        NSString * str5 = giftModel.effect_des;
         NSString * str6 = [ControllerManager returnPositionWithRank:[model.content objectForKey:@"rank"]];
         
         NSString * bodyStr = [NSString stringWithFormat:@"%@— %@ 腹黑一笑，对 %@ 扔了一个 %@, %@ %@ 人气 %@", str6, str1, str2, str3, str2, str5, str4];

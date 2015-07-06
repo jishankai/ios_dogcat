@@ -99,6 +99,9 @@
 @property (nonatomic)int u_gender;
 @property (nonatomic)int u_city;
 
+//5.6、、未使用
+@property (nonatomic, retain) NSDictionary *dictData;
+
 //@property (nonatomic,copy)void (^dismiss)(void);
 
 //认养宠物的信息

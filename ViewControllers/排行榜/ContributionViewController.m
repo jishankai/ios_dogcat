@@ -243,8 +243,8 @@
     }
     PopularityCell * cell = [tableView dequeueReusableCellWithIdentifier:cellID];
     popularityListModel *model = self.contributionDataArray[indexPath.row];
-    cell.cellClick = ^(int num){
-        NSLog(@"跳转到第%d个国家", num);
+    cell.cellClick = ^(NSInteger num){
+        NSLog(@"跳转到第%ld个国家", num);
         UserCardViewController * vc = [[UserCardViewController alloc] init];
         vc.usr_id = model.usr_id;
         [self.view addSubview:vc.view];
@@ -262,9 +262,9 @@
 //    tableView == tv2 && indexPath.row == myRanking-1
     if (indexPath.row == myRanking-1) {
         cell.backgroundColor = [ControllerManager colorWithHexString:@"f9f9f9"];
-        [cell configUIWithName:model.name rq:model.t_contri rank:indexPath.row+1 upOrDown:model.vary shouldLarge:YES];
+        [cell configUIWithName:model.name rq:model.t_contri rank:(int)indexPath.row+1 upOrDown:model.vary shouldLarge:YES];
     }else{
-        [cell configUIWithName:model.name rq:model.t_contri rank:indexPath.row+1 upOrDown:model.vary shouldLarge:NO];
+        [cell configUIWithName:model.name rq:model.t_contri rank:(int)indexPath.row+1 upOrDown:model.vary shouldLarge:NO];
     }
     
     SDWebImageManager *manager = [SDWebImageManager sharedManager];
@@ -308,7 +308,7 @@
     }
     return cell;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 50.0f;
 }

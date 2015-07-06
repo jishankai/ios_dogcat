@@ -58,7 +58,14 @@
 @property(nonatomic,retain)NSMutableArray * dataArray;
 
 @property(nonatomic,copy)void (^showFrontImage)(NSString *, NSInteger, NSString *, NSString *);
+//img_id star_id aid name massName UIImage*
+@property(nonatomic,copy)void (^showMassAlert)(NSString *, NSString *, NSString *, NSString *, NSString *, UIImage *);
 @property (nonatomic,copy)NSString * img_id;
 
 @property (nonatomic) int publishType;
+
+//判断是否为活动照片
+@property (nonatomic)BOOL isFromMasselection;
+@property (nonatomic,strong)NSString *MasselctionName;
+@property (nonatomic,strong)NSString *starId;
 @end

@@ -39,7 +39,7 @@
 
 @property(nonatomic,retain)NSMutableArray * totalGoodsDataArray;
 @property(nonatomic,retain)NSMutableArray * priceHighToLowArray;
-@property(nonatomic,retain)NSMutableArray * priceLotToHighArray;
+@property(nonatomic,retain)NSMutableArray * priceLowToHighArray;
 @property(nonatomic,retain)NSArray * showArray;
 @property(nonatomic)BOOL isQuick;
 @end

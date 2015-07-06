@@ -22,13 +22,13 @@
 
 @interface CircularProgressView : UIView
 
-@property (nonatomic) UIColor *backColor;
-@property (nonatomic) UIColor *progressColor;
-@property (nonatomic) NSURL *audioURL;
+@property (nonatomic, retain) UIColor *backColor;
+@property (nonatomic, retain) UIColor *progressColor;
+@property (nonatomic, retain) NSURL *audioURL;
 @property (nonatomic) CGFloat lineWidth;
 @property (nonatomic) NSTimeInterval duration;
 @property (nonatomic) BOOL playOrPauseButtonIsPlaying;
-@property (nonatomic) id <CircularProgressViewDelegate> delegate;
+@property (nonatomic, assign) id <CircularProgressViewDelegate> delegate;
 
 - (id)initWithFrame:(CGRect)frame
           backColor:(UIColor *)backColor

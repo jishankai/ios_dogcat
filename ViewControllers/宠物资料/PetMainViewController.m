@@ -91,6 +91,7 @@
                 if ([[USER objectForKey:@"isSuccess"] intValue]) {
                     if (blockSelf->isMyPet) {
                         blockSelf->pBtn.selected = YES;
+                        [pBtn setBackgroundImage:[UIImage imageNamed:@"pet_attractfans.png"] forState:UIControlStateSelected];
                         ENDLOADING;
                     }else{
                         [blockSelf loadPetsData];
@@ -237,8 +238,10 @@
 }
 -(void)backBtnClick
 {
-    headBlurImage.image = nil;
-    [self dismissViewControllerAnimated:YES completion:nil];
+    __block PetMainViewController *blockSelf = self;
+    [self dismissViewControllerAnimated:YES completion:^{
+        blockSelf->headBlurImage.image = nil;
+    }];
 }
 -(void)threePBtnClick
 {
@@ -463,6 +466,13 @@
         ShowAlertView;
         return;
     }
+    
+    if (isMyPet) {
+        //拉粉丝
+        [self threePBtnClick];
+        return;
+    }
+    
     __block Alert_oneBtnView * oneBtn = [[Alert_oneBtnView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     __block NoCloseAlert * noClose = nil;
     if (!btn.selected) {
@@ -474,7 +484,7 @@
             if (isFinish) {
                 NSArray * array = [load.dataDict objectForKey:@"data"];
                 if (array.count >= 10) {
-                    int cost = array.count*5;
+                    int cost = (int)array.count*5;
                     if (cost>100) {
                         cost = 100;
                     }
@@ -490,13 +500,13 @@
                         return;
                     }
                     oneBtn.type = 2;
-                    oneBtn.petsNum = array.count;
+                    oneBtn.petsNum = (int)array.count;
                     [oneBtn makeUI];
                     [self.view addSubview:oneBtn];
                     [oneBtn release];
                 }else{
                     oneBtn.type = 2;
-                    oneBtn.petsNum = array.count;
+                    oneBtn.petsNum = (int)array.count;
                     [oneBtn makeUI];
                     [self.view addSubview:oneBtn];
                     [oneBtn release];
@@ -520,15 +530,13 @@
                                 tempLabel.text = [NSString stringWithFormat:@"%d", [tempLabel.text intValue]+1];
                                 
                                 if (array.count>=10) {
-                                    int cost = array.count*5;
+                                    NSInteger cost = array.count*5;
                                     if (cost>100) {
                                         [USER setObject:[NSString stringWithFormat:@"%d", [[USER objectForKey:@"gold"] intValue]-100] forKey:@"gold"];
                                     }else{
-                                       [USER setObject:[NSString stringWithFormat:@"%d", [[USER objectForKey:@"gold"] intValue]-cost] forKey:@"gold"];
+                                       [USER setObject:[NSString stringWithFormat:@"%ld", [[USER objectForKey:@"gold"] integerValue]-cost] forKey:@"gold"];
                                     }
-                                    
                                 }
-                                
                             }
                             //                            [MyControl loadingSuccessWithContent:@"加入成功" afterDelay:0.5f];
                             ENDLOADING;
@@ -717,7 +725,7 @@
 }
 -(void)detailBtnClick:(UIButton *)btn
 {
-    int a = btn.tag-300;
+    int a = (int)btn.tag-300;
     if (a == 0) {
         PetMain_Active_ViewController * vc = [[PetMain_Active_ViewController alloc] init];
         vc.model = self.model;
@@ -756,14 +764,14 @@
         cell.selectionStyle = 0;
         
         if(indexPath.row == 0 && [self.model.total_food isKindOfClass:[NSString class]]){
-            [cell modifyUIWithIndex:indexPath.row Num:self.model.total_food];
+            [cell modifyUIWithIndex:(int)indexPath.row Num:self.model.total_food];
         }else if (indexPath.row == 1 && [self.rq isKindOfClass:[NSString class]]) {
-            [cell modifyUIWithIndex:indexPath.row Num:self.rq];
+            [cell modifyUIWithIndex:(int)indexPath.row Num:self.rq];
 //            indexPath.row == 2 && [self.model.gifts isKindOfClass:[NSString class]]
         }else if(indexPath.row == 2 && [self.rq isKindOfClass:[NSString class]]){
-            [cell modifyUIWithIndex:indexPath.row Num:@"0"];
+            [cell modifyUIWithIndex:(int)indexPath.row Num:@"0"];
         }else{
-            [cell modifyUIWithIndex:indexPath.row Num:@"100"];
+            [cell modifyUIWithIndex:(int)indexPath.row Num:@"100"];
         }
         
         return cell;
@@ -823,7 +831,7 @@
         [gift release];
     }
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.row != 3) {
         return 55.0f;
@@ -834,8 +842,8 @@
 
 -(void)actBtnClick:(UIButton *)btn
 {
-    NSLog(@"%d",btn.tag);
-    int a = btn.tag-200;
+    NSLog(@"%ld",btn.tag);
+    int a = (int)btn.tag-200;
     if (a == 0) {
         //求口粮
         
@@ -895,6 +903,7 @@
         
     }else if (a == 1) {
         
+        if (self.model.aid != nil) {
         RockViewController *shake = [[RockViewController alloc] init];
 //        shake.isFromStar = YES;
         shake.titleString = @"摇一摇";
@@ -918,10 +927,13 @@
 //            //                NSLog(@"%@--%d", cell.contributionLabel.text, contri+[add_rq intValue]);
 //        };
         [self addChildViewController:shake];
-        [shake release];
         [shake didMoveToParentViewController:self];
         [shake becomeFirstResponder];
         [self.view addSubview:shake.view];
+        [shake release];
+        } else {
+            kDataLoadFailed;
+        }
     }else if (a == 2) {
         if([[USER objectForKey:@"confVersion"] isEqualToString:[USER objectForKey:@"versionKey"]]){
             //提交版本，关闭周边
@@ -978,6 +990,7 @@
         
     }else if (a == 3) {
 //        UILabel * label = (UILabel *)[self.view viewWithTag:303];
+        if (self.model.aid != nil) {
         TouchViewController *touch = [[TouchViewController alloc] init];
 //        touch.isFromStar = YES;
 //        touch.touchBack = ^(void){
@@ -994,6 +1007,9 @@
         [touch release];
         [touch didMoveToParentViewController:self];
         [self.view addSubview:touch.view];
+        } else {
+            kDataLoadFailed;
+        }
     }
 }
 #pragma mark - sendGifts
@@ -1094,15 +1110,16 @@
         screenshotImage = [UIImage imageNamed:@"record_upload.png"];
     }
     
-    int a = button.tag-400;
+    int a = (int)button.tag-400;
     
+    NSString *content = [NSString stringWithFormat:@"我是大萌星%@，快来跟我一起玩嘛~", self.model.name];
     if (a == 0) {
         NSLog(@"微信");
         //强制分享图片
         [UMSocialData defaultData].extConfig.wxMessageType = UMSocialWXMessageTypeWeb;
         [UMSocialData defaultData].extConfig.wechatSessionData.url = [NSString stringWithFormat:@"%@%@", PETMAINSHAREAPI, self.aid];
-        [UMSocialData defaultData].extConfig.wechatSessionData.title = [NSString stringWithFormat:@"我是%@，来自宠物星球的大萌星！", self.model.name];
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:@"人家在宠物星球好开心，快来跟我一起玩嘛~" image:screenshotImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+        [UMSocialData defaultData].extConfig.wechatSessionData.title = [NSString stringWithFormat:@"我是大萌星，%@", self.model.name];
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:content image:screenshotImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
                 [MyControl popAlertWithView:self.view Msg:@"分享成功"];
@@ -1120,8 +1137,8 @@
         //强制分享图片
         [UMSocialData defaultData].extConfig.wxMessageType = UMSocialWXMessageTypeWeb;
         [UMSocialData defaultData].extConfig.wechatTimelineData.url = [NSString stringWithFormat:@"%@%@", PETMAINSHAREAPI, self.aid];
-        [UMSocialData defaultData].extConfig.wechatTimelineData.title = [NSString stringWithFormat:@"我是%@，来自宠物星球的大萌星！", self.model.name];
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:@"人家在宠物星球好开心，快来跟我一起玩嘛~" image:screenshotImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+        [UMSocialData defaultData].extConfig.wechatTimelineData.title = [NSString stringWithFormat:@"我是大萌星，%@", self.model.name];
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:content image:screenshotImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
                 [MyControl popAlertWithView:self.view Msg:@"分享成功"];
@@ -1136,7 +1153,7 @@
         }];
     }else{
         NSLog(@"微博");
-        NSString * str = [NSString stringWithFormat:@"人家在宠物星球好开心，快来跟我一起玩嘛~%@（分享自@宠物星球社交应用）", [NSString stringWithFormat:@"%@%@", PETMAINSHAREAPI, self.aid]];
+        NSString * str = [NSString stringWithFormat:@"%@%@ #我是大萌星#", content, [NSString stringWithFormat:@"%@%@", PETMAINSHAREAPI, self.aid]];
 //        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:str image:screenshotImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
 //            if (response.responseCode == UMSResponseCodeSuccess) {
 //                NSLog(@"分享成功！");
@@ -1187,7 +1204,7 @@
         
         NSUInteger sourceType = 0;
         
-        [USER setObject:[NSString stringWithFormat:@"%d", buttonIndex] forKey:@"buttonIndex"];
+        [USER setObject:[NSString stringWithFormat:@"%ld", buttonIndex] forKey:@"buttonIndex"];
         // 判断是否支持相机
         if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
             

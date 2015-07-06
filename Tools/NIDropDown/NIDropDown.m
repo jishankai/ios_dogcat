@@ -34,7 +34,7 @@
     lineColor = LineColor;
 }
 
-- (id)showDropDown:(UIButton *)b:(CGFloat *)height:(NSArray *)arr {
+- (id)showDropDown:(UIButton *)b :(CGFloat *)height :(NSArray *)arr {
     btnSender = b;
     self = [super init];
     if (self) {
@@ -136,8 +136,8 @@
     
 }
 
-- (void) myDelegateWithLine:(int)Line Words:(NSString *)Words {
-    [self.delegate didSelected:self Line:Line Words:Words];
+- (void) myDelegateWithLine:(NSInteger)Line Words:(NSString *)Words {
+    [self.delegate didSelected:self Line:(int)Line Words:Words];
     [self.delegate niDropDownDelegateMethod:self];   
 }
 

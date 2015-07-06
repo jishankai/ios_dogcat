@@ -33,7 +33,7 @@
 @property(nonatomic,retain)UILabel * actLabel;
 
 @property(nonatomic)BOOL isFromShake;
-@property(nonatomic)int leftShakeTimes;
+@property(nonatomic,assign) NSInteger leftShakeTimes;
 
 @property(nonatomic,copy)void (^confirm)(void);
 @property(nonatomic,copy)void (^shakeMore)(void);

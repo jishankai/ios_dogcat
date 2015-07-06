@@ -308,8 +308,8 @@
 }
 -(void)picClick:(UIButton *)btn
 {
-    NSLog(@"%d", btn.tag);
-    int a = btn.tag-100;
+    NSLog(@"%ld", btn.tag);
+    NSInteger a = btn.tag-100;
     PetMainViewController * vc = [[PetMainViewController alloc] init];
     vc.aid = [self.petsDataArray[a] aid];
     [self presentViewController:vc animated:YES completion:nil];
@@ -374,11 +374,6 @@
         chatController.other_nickName = self.userModel.name;
         chatController.other_tx = self.userModel.tx;
         
-//        TalkViewController * vc = [[TalkViewController alloc] init];
-//        vc.friendName = self.userModel.name;
-//        vc.usr_id = self.usr_id;
-//        vc.otherTX = self.userModel.tx;
-//        NSLog(@"%@--%@--%@", [headerDict objectForKey:@"name"], [headerDict objectForKey:@"usr_id"], [headerDict objectForKey:@"tx"]);
         [self presentViewController:chatController animated:YES completion:nil];
         [chatController release];
     }

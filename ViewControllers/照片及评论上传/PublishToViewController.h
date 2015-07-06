@@ -14,7 +14,7 @@
     
 }
 @property (nonatomic,copy)NSString * aid;
-@property (nonatomic)int index;
+@property (nonatomic,assign)NSInteger index;
 @property (nonatomic,retain)NSMutableArray * dataArray;
 @property (nonatomic,retain)NSMutableArray * selectArray;
 @property (nonatomic,retain)NSMutableArray * selectNameArray;

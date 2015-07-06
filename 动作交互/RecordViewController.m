@@ -499,7 +499,7 @@
         lame_init_params(lame);
         
         do {
-            read = fread(pcm_buffer, 2*sizeof(short int), PCM_SIZE, pcm);
+            read = (int)fread(pcm_buffer, 2*sizeof(short int), PCM_SIZE, pcm);
             if (read == 0)
                 write = lame_encode_flush(lame, mp3_buffer, MP3_SIZE);
             else
@@ -725,7 +725,7 @@
         }];
     }else if(sender.tag == 79){
         NSLog(@"微博");
-        NSString * str = [NSString stringWithFormat:@"我家萌宠%@今天乖巧的冲我撒娇，来听听吧。http://home4pet.imengstar.com/（分享自@宠物星球社交应用）", self.pet_name];
+        NSString * str = [NSString stringWithFormat:@"我家萌宠%@今天乖巧的冲我撒娇，来听听吧。http://home4pet.imengstar.com/ #我是大萌星#", self.pet_name];
         [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:str image:image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");

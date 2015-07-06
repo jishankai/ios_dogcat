@@ -28,7 +28,7 @@
     self.defaultBtn.layer.cornerRadius = 5;
     self.defaultBtn.layer.masksToBounds = YES;
 }
--(void)configUIWithModel:(UserPetListModel *)model Default:(BOOL)isDefault Row:(int)row
+-(void)configUIWithModel:(UserPetListModel *)model Default:(BOOL)isDefault Row:(NSInteger)row
 {
     rowNum = row;
     self.master_id = model.master_id;

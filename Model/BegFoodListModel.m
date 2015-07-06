@@ -10,10 +10,11 @@
 
 @implementation BegFoodListModel
 
+
 -(void)dealloc
 {
     [super dealloc];
-    [_aid release];
+//    [_aid release];   //避免多次点击tabbar赏粮崩溃
     [_cmt release];
     [_create_time release];
     [_food release];

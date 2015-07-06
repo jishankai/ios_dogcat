@@ -38,13 +38,39 @@
     
     self.bagItemIdArray = [NSMutableArray arrayWithCapacity:0];
     self.bagItemNumArray = [NSMutableArray arrayWithCapacity:0];
-    self.giftArray = [NSMutableArray arrayWithArray:[ControllerManager returnAllGiftsArray]];
-    self.tempGiftArray = [NSMutableArray arrayWithArray:self.giftArray];
+    self.giftArray = [NSMutableArray arrayWithCapacity:0];
+    self.tempGiftArray = [NSMutableArray arrayWithCapacity:0];
+    
+    [self addGiftData];
     
     [self backgroundView];
     [self loadBagData];
 
 //    [self createUI];
+}
+-(void)addGiftData
+{
+    NSDictionary *dict = [ControllerManager returnTotalGiftDict];
+    NSMutableArray *allKeys = [NSMutableArray arrayWithArray:[dict allKeys]];
+    //排序 gift_id从小到大
+    for (int i=0; i<allKeys.count; i++) {
+        for (int j=0; j<allKeys.count-1-i; j++) {
+            if ([allKeys[j] intValue]>[allKeys[j+1] intValue]) {
+                NSString * giftId1 = allKeys[j];
+                NSString * giftId2 = allKeys[j+1];
+                allKeys[j] = giftId2;
+                allKeys[j+1] = giftId1;
+            }
+        }
+    }
+    
+    for (NSString *giftId in allKeys) {
+        GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:giftId];
+        [self.giftArray addObject:model];
+        [self.tempGiftArray addObject:model];
+    }
+    
+    
 }
 
 - (void)backgroundView
@@ -103,7 +129,7 @@
 //            NSLog(@"%d", self.tempGiftArray.count);
             for (int i=0; i<blockSelf.tempGiftArray.count; i++) {
                 for (int j=0; j<blockSelf.bagItemIdArray.count; j++) {
-                    if ([[blockSelf.tempGiftArray[i] objectForKey:@"no"] isEqualToString:blockSelf.bagItemIdArray[j]]) {
+                    if ([[blockSelf.tempGiftArray[i] gift_id] isEqualToString:blockSelf.bagItemIdArray[j]]) {
                         [blockSelf.tempGiftArray removeObjectAtIndex:i];
                         i--;
                         break;
@@ -294,25 +320,28 @@
             }else{
                 hang_tag.image = [UIImage imageNamed:@"giftAlert_goodBg.png"];
             }
-            giftImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", self.bagItemIdArray[i]]];
-            NSDictionary * dic = [ControllerManager returnGiftDictWithItemId:self.bagItemIdArray[i]];
-            productLabel.text = [dic objectForKey:@"name"];
-            rqz.text = [dic objectForKey:@"add_rq"];
+            GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:self.bagItemIdArray[i]];
+            
+            [giftImageView setImageWithURL:[NSURL URLWithString:model.detail_image]];
+            productLabel.text = model.name;
+            rqz.text = model.add_rq;
             
             giftNum.text = [NSString stringWithFormat:@"x %@", self.bagItemNumArray[i]];
         }else{
             //商店
             giftIcon.hidden = YES;
-            if ([[self.tempGiftArray[i-self.bagItemIdArray.count] objectForKey:@"no"] intValue]>2000) {
+            if ([[self.tempGiftArray[i-self.bagItemIdArray.count] gift_id] intValue]>2000) {
                 hang_tag.image = [UIImage imageNamed:@"giftAlert_badBg.png"];
             }else{
                 hang_tag.image = [UIImage imageNamed:@"giftAlert_goodBg.png"];
             }
-            giftImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", [self.tempGiftArray[i-self.bagItemIdArray.count] objectForKey:@"no"]]];
-
-            productLabel.text = [self.tempGiftArray[i-self.bagItemIdArray.count] objectForKey:@"name"];
-            rqz.text = [self.tempGiftArray[i-self.bagItemIdArray.count] objectForKey:@"add_rq"];
-            price.text = [self.tempGiftArray[i-self.bagItemIdArray.count] objectForKey:@"price"];
+            
+            GiftsModel *model = self.tempGiftArray[i-self.bagItemIdArray.count];
+            
+            [giftImageView setImageWithURL:[NSURL URLWithString:model.detail_image]];
+            productLabel.text = model.name;
+            rqz.text = model.add_rq;
+            price.text = model.price;
         }
         /********************/
         if (i+1<self.bagItemIdArray.count) {
@@ -324,24 +353,27 @@
             }else{
                 hang_tag2.image = [UIImage imageNamed:@"giftAlert_goodBg.png"];
             }
-            giftImageView2.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", self.bagItemIdArray[i+1]]];
-            NSDictionary * dic = [ControllerManager returnGiftDictWithItemId:self.bagItemIdArray[i+1]];
-            productLabel2.text = [dic objectForKey:@"name"];
-            rqz2.text = [dic objectForKey:@"add_rq"];
+            GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:self.bagItemIdArray[i+1]];
+            
+            [giftImageView2 setImageWithURL:[NSURL URLWithString:model.detail_image]];
+            productLabel2.text = model.name;
+            rqz2.text = model.add_rq;
             
             giftNum2.text = [NSString stringWithFormat:@"x %@", self.bagItemNumArray[i+1]];
         }else{
             //
             giftIcon2.hidden = YES;
-            if ([[self.tempGiftArray[i+1-self.bagItemIdArray.count] objectForKey:@"no"] intValue]>2000) {
+            if ([[self.tempGiftArray[i+1-self.bagItemIdArray.count] gift_id] intValue]>2000) {
                 hang_tag2.image = [UIImage imageNamed:@"giftAlert_badBg.png"];
             }else{
                 hang_tag2.image = [UIImage imageNamed:@"giftAlert_goodBg.png"];
             }
-            giftImageView2.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", [self.tempGiftArray[i+1-self.bagItemIdArray.count] objectForKey:@"no"]]];
-            productLabel2.text = [self.tempGiftArray[i+1-self.bagItemIdArray.count] objectForKey:@"name"];
-            rqz2.text = [self.tempGiftArray[i+1-self.bagItemIdArray.count] objectForKey:@"add_rq"];
-            price2.text = [self.tempGiftArray[i+1-self.bagItemIdArray.count] objectForKey:@"price"];
+            GiftsModel *model = self.tempGiftArray[i+1-self.bagItemIdArray.count];
+            
+            [giftImageView2 setImageWithURL:[NSURL URLWithString:model.detail_image]];
+            productLabel2.text = model.name;
+            rqz2.text = model.add_rq;
+            price2.text = model.price;
         }
         if ([rqz.text rangeOfString:@"-"].location == NSNotFound) {
             rqz.text = [NSString stringWithFormat:@"+%@", rqz.text];
@@ -354,7 +386,7 @@
 
 -(void)sendGiftBtnClick:(UIButton *)btn
 {
-    NSLog(@"btn.tag:%d", btn.tag);
+    NSLog(@"btn.tag:%ld", btn.tag);
     [self clickBtn:btn];
 }
 
@@ -373,11 +405,11 @@
 {
     if (btn.tag-1000 >= self.bagItemIdArray.count) {
         //购买赠送
-        NSLog(@"%@", [self.tempGiftArray[btn.tag-1000-self.bagItemIdArray.count] objectForKey:@"name"]);
-        [self buyGiftWithItemId:[self.tempGiftArray[btn.tag-1000-self.bagItemIdArray.count] objectForKey:@"no"]];
+        NSLog(@"%@", [self.tempGiftArray[btn.tag-1000-self.bagItemIdArray.count] name]);
+        [self buyGiftWithItemId:[self.tempGiftArray[btn.tag-1000-self.bagItemIdArray.count] gift_id]];
     }else{
         //直接赠送
-        NSLog(@"%@", [[ControllerManager returnGiftDictWithItemId:self.bagItemIdArray[btn.tag-1000]] objectForKey:@"name"]);
+        NSLog(@"%@", [[ControllerManager returnGiftsModelWithGiftId:self.bagItemIdArray[btn.tag-1000]] name]);
         [self sendGiftWithItemId:self.bagItemIdArray[btn.tag-1000] fromBag:YES];
     }
     
@@ -385,14 +417,14 @@
 #pragma mark - 买礼物
 -(void)buyGiftWithItemId:(NSString *)ItemId
 {
-    NSDictionary * tempDic = [ControllerManager returnGiftDictWithItemId:ItemId];
-    if([[tempDic objectForKey:@"price"] intValue] > [[USER objectForKey:@"gold"] intValue]){
+    GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:ItemId];
+    if([model.price intValue] > [[USER objectForKey:@"gold"] intValue]){
         //余额不足
         if([[USER objectForKey:@"confVersion"] isEqualToString:[USER objectForKey:@"versionKey"]]){
             //审核
             [MyControl popAlertWithView:self.view Msg:@"钱包君告急！挣够金币再来购物吧~"];
         }else{
-            [ControllerManager addAlertWith:self Cost:[[tempDic objectForKey:@"price"] intValue] SubType:2];
+            [ControllerManager addAlertWith:self Cost:[model.price intValue] SubType:2];
         }
         return;
     }
@@ -455,7 +487,7 @@
                             //将背包中有的从tempGiftArray中剔除
                             for (int i=0; i<self.tempGiftArray.count; i++) {
                                 for (int j=0; j<self.bagItemIdArray.count; j++) {
-                                    if ([[self.tempGiftArray[i] objectForKey:@"no"] isEqualToString:self.bagItemIdArray[j]]) {
+                                    if ([[self.tempGiftArray[i] gift_id] isEqualToString:self.bagItemIdArray[j]]) {
                                         [self.tempGiftArray removeObjectAtIndex:i];
                                         i--;
                                         break;
@@ -474,10 +506,10 @@
                 [sv removeFromSuperview];
                 [self createUI];
                 //
-                [ControllerManager HUDText:[NSString stringWithFormat:@"恭喜您，赠送 %@ 成功!", [[ControllerManager returnGiftDictWithItemId:ItemId] objectForKey:@"name"]] showView:self.view yOffset:-60];
+                [ControllerManager HUDText:[NSString stringWithFormat:@"恭喜您，赠送 %@ 成功!", [[ControllerManager returnGiftsModelWithGiftId:ItemId] name]] showView:self.view yOffset:-60];
             }else{
                 //非背包物品
-                [ControllerManager HUDText:[NSString stringWithFormat:@"恭喜您，购买并赠送 %@ 成功!", [[ControllerManager returnGiftDictWithItemId:ItemId] objectForKey:@"name"]] showView:self.view yOffset:-60];
+                [ControllerManager HUDText:[NSString stringWithFormat:@"恭喜您，购买并赠送 %@ 成功!", [[ControllerManager returnGiftsModelWithGiftId:ItemId] name]] showView:self.view yOffset:-60];
             }
             
             int addExp = [[[load.dataDict objectForKey:@"data"] objectForKey:@"exp"] intValue];

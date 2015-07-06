@@ -209,7 +209,7 @@
 }
 -(void)carousel:(iCarousel *)carousel didSelectItemAtIndex:(NSInteger)index
 {
-    NSLog(@"---%d", index);
+    NSLog(@"---%ld",index);
     self.imageClick(index);
 }
 - (CATransform3D)carousel:(iCarousel *)_carousel transformForItemView:(UIView *)view withOffset:(CGFloat)offset

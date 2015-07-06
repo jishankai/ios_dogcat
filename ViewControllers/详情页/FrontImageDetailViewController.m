@@ -14,7 +14,7 @@
 #import "BackImageDetailCommentViewCell.h"
 #import "ChatViewController.h"
 
-@interface FrontImageDetailViewController () <UMSocialUIDelegate>
+@interface FrontImageDetailViewController () <UMSocialUIDelegate,UIGestureRecognizerDelegate>
 
 @end
 
@@ -49,6 +49,8 @@
 //    [_petDict release];
     [_img_id release];
     
+    //释放通知
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     //清除缓存图片
 //    SDImageCache * cache = [SDImageCache sharedImageCache];
 //    [cache clearMemory];
@@ -146,6 +148,17 @@
         } completion:nil];
     }];
 }
+
+//-(void)viewWillAppear:(BOOL)animated
+//{
+//    [super viewWillAppear:animated];
+//    [ControllerManager hideTabBar];
+//}
+//-(void)viewWillDisappear:(BOOL)animated
+//{
+//    [super viewWillDisappear:animated];
+//    [ControllerManager showTabBar];
+//}
 //-(void)viewDidDisappear:(BOOL)animated
 //{
 //    [super viewDidDisappear:animated];
@@ -154,6 +167,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [ControllerManager hideTabBar];
+    
     [MobClick event:@"photopage"];
     
     self.view.backgroundColor = [UIColor clearColor];
@@ -185,6 +200,11 @@
     
 //    UIImageView * image = [MyControl createImageViewWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) ImageName:@"cat2.jpg"];
 //    [self.view addSubview:image];
+    
+    // 监听表情选中的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(emotionDidSelected:) name:HMEmotionDidSelectedNotification object:nil];
+    // 监听删除按钮点击的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(emotionDidDeleted:) name:HMEmotionDidDeletedNotification object:nil];
     
     [self createUI];
     
@@ -218,6 +238,10 @@
     }];
     
     [self showThumbImage];
+    
+    if(self.showBackIndex){
+        [self swipeLeft:swipeLeft];
+    }
 }
 -(void)loadImageData
 {
@@ -225,7 +249,7 @@
     
     NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"img_id=%@&usr_id=%@dog&cat", self.img_id, [USER objectForKey:@"usr_id"]]];
     NSString * url = [NSString stringWithFormat:@"%@%@&usr_id=%@&sig=%@&SID=%@", IMAGEINFOAPI, self.img_id, [USER objectForKey:@"usr_id"], sig, [ControllerManager getSID]];
-    NSLog(@"imageInfoAPI:%@", url);
+//    NSLog(@"imageInfoAPI:%@", url);
     
     __block FrontImageDetailViewController * blockSelf = self;
     [blockSelf retain];
@@ -316,7 +340,10 @@
         }else{
             
             blockSelf->imageNotExist = YES;
-            blockSelf->sv.hidden = NO;
+            if (!blockSelf.showBackIndex) {
+                blockSelf->sv.hidden = NO;
+            }
+            
             [MyControl popAlertWithView:blockSelf.view Msg:@"网络或数据异常"];
             NSLog(@"数据加载失败");
         }
@@ -558,10 +585,12 @@
     [request release];
 }
 
-#pragma mark -
+#pragma mark - 
+// 点击显示图片
 -(void)showThumbImage
 {
     if ([self.imageURL isKindOfClass:[NSURL class]] && self.imageURL != nil) {
+        __block FrontImageDetailViewController *blockSelf = self;
         [bigImageView setImageWithURL:self.imageURL completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
             if (!error && image != nil) {
                 bigImageView.canClick = YES;
@@ -578,16 +607,16 @@
                 
                 sv.contentSize = CGSizeMake(sv.frame.size.width, rect2.origin.y + rect2.size.height+50);
                 
-                sv.hidden = NO;
+                if (!blockSelf.showBackIndex) {
+                    sv.hidden = NO;
+                }
             }
-            
         }];
     }
 }
 
 -(void)modifyUI
 {
-    
 //    LOADING;
 //    bigImageView.canClick = NO;
     [bigImageView setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", IMAGEURL, [self.imageDict objectForKey:@"url"]]] placeholderImage:bigImageView.image completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
@@ -597,7 +626,9 @@
             bigImageView.canClick = YES;
         }
         ENDLOADING;
-        sv.hidden = NO;
+        if (!self.showBackIndex) {
+            sv.hidden = NO;
+        }
         
         
         CGRect rect = bigImageView.frame;
@@ -612,17 +643,24 @@
         //
         CGRect rect2 = desLabel.frame;
         if ([[self.imageDict objectForKey:@"cmt"] isKindOfClass:[NSString class]] && [[self.imageDict objectForKey:@"cmt"] length]>0) {
-            desLabel.text = [self.imageDict objectForKey:@"cmt"];
+//            desLabel.text = [self.imageDict objectForKey:@"cmt"];
+            desLabel.attributedText = [ControllerManager changToAttributedText:[self.imageDict objectForKey:@"cmt"]];
+            desLabel.font = [UIFont systemFontOfSize:13];
+            desLabel.textColor = GRAY;
             CGSize size;
             if ([MyControl isIOS7]) {
-                size = [desLabel.text boundingRectWithSize:CGSizeMake(rect2.size.width, 100) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:13]} context:nil].size;
+                size = [[self.imageDict objectForKey:@"cmt"] boundingRectWithSize:CGSizeMake(rect2.size.width, 1000) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:13]} context:nil].size;
             }else{
-                size = [desLabel.text sizeWithFont:[UIFont systemFontOfSize:13] constrainedToSize:CGSizeMake(rect2.size.width, 100) lineBreakMode:1];
+                size = [[self.imageDict objectForKey:@"cmt"] sizeWithFont:[UIFont systemFontOfSize:13] constrainedToSize:CGSizeMake(rect2.size.width, 1000) lineBreakMode:1];
             }
-            
+//            if (size.height>25) {
+//                rect2.size.height = size.height;
+//            }else{
+//                rect2.size.height = 25.0;
+//            }
             rect2.size.height = size.height;
             rect2.origin.y = rect.origin.y+rect.size
-            .height+10;
+            .height+5;
             desLabel.frame = rect2;
         }else{
             rect2.size.height = 0;
@@ -732,35 +770,56 @@
     gift.text = [self.imageDict objectForKey:@"gifts"];
     
     UILabel * comment = (UILabel *)[imageBgView2 viewWithTag:302];
-    comment.text = [NSString stringWithFormat:@"%d", self.usrIdArray.count];
+    comment.text = [NSString stringWithFormat:@"%ld", self.usrIdArray.count];
     
     UILabel * share = (UILabel *)[imageBgView2 viewWithTag:303];
     share.text = [self.imageDict objectForKey:@"shares"];
     
     
     //照片详情页反过来以后，能不能默认先显示评论，如果评论为0显示礼物，礼物为0显示点赞，点赞也为0显示转发，都是0的话就还是显示评论~
-    if (self.usrIdArray.count) {
-        UIButton * btn = (UIButton *)[imageBgView2 viewWithTag:502];
-        tv.hidden = YES;
-        desTv.hidden = NO;
-        [self backClick:btn];
+    if (self.showBackIndex) {
+        UIButton * btn = (UIButton *)[imageBgView2 viewWithTag:500+self.showBackIndex-1];
+        switch (self.showBackIndex) {
+            case 1:
+            case 2:
+            case 4:
+                tv.hidden = NO;
+                desTv.hidden = YES;
+                [self backClick:btn];
+                break;
+            case 3:
+                tv.hidden = YES;
+                desTv.hidden = NO;
+                [self backClick:btn];
+                break;
+            default:
+                break;
+        }
     }else{
-        tv.hidden = NO;
-        desTv.hidden = YES;
-        UIButton * btn = nil;
-        if ([gift.text intValue]) {
-            btn = (UIButton *)[imageBgView2 viewWithTag:501];
-        }else if([zan.text intValue]){
-            btn = (UIButton *)[imageBgView2 viewWithTag:500];
-        }else if([share.text intValue]){
-            btn = (UIButton *)[imageBgView2 viewWithTag:503];
-        }else{
+        if (self.usrIdArray.count) {
+            UIButton * btn = (UIButton *)[imageBgView2 viewWithTag:502];
             tv.hidden = YES;
             desTv.hidden = NO;
-            btn = (UIButton *)[imageBgView2 viewWithTag:502];
+            [self backClick:btn];
+        }else{
+            tv.hidden = NO;
+            desTv.hidden = YES;
+            UIButton * btn = nil;
+            if ([gift.text intValue]) {
+                btn = (UIButton *)[imageBgView2 viewWithTag:501];
+            }else if([zan.text intValue]){
+                btn = (UIButton *)[imageBgView2 viewWithTag:500];
+            }else if([share.text intValue]){
+                btn = (UIButton *)[imageBgView2 viewWithTag:503];
+            }else{
+                tv.hidden = YES;
+                desTv.hidden = NO;
+                btn = (UIButton *)[imageBgView2 viewWithTag:502];
+            }
+            [self backClick:btn];
         }
-        [self backClick:btn];
     }
+  
 }
 
 #pragma mark -
@@ -793,6 +852,7 @@
     
     //手势
     UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+    tap.delegate = self;
     [sv addGestureRecognizer:tap];
     [tap release];
     
@@ -802,9 +862,9 @@
     imageBgView.layer.borderColor = [UIColor colorWithRed:206/255.0 green:206/255.0 blue:206/255.0 alpha:1].CGColor;
     [sv addSubview:imageBgView];
     
-    UITapGestureRecognizer * tap2 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap2:)];
-    [imageBgView addGestureRecognizer:tap2];
-    [tap2 release];
+//    UITapGestureRecognizer * tap2 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap2:)];
+//    [imageBgView addGestureRecognizer:tap2];
+//    [tap2 release];
     
     bigImageView = [[ClickImage alloc] initWithFrame:CGRectMake(8, 5, imageBgView.frame.size.width-16, 300)];
 //    bigImageView.canClick = YES;
@@ -814,8 +874,14 @@
     
     
     //图片描述
-    desLabel = [MyControl createLabelWithFrame:CGRectMake(13, 315, bigImageView.frame.size.width, 20) Font:13 Text:@""];
+    desLabel = [[HMEmotionTextView alloc] initWithFrame:CGRectMake(8, 315, bigImageView.frame.size.width, 20)];
+    desLabel.font = [UIFont systemFontOfSize:13];
+//    [MyControl createLabelWithFrame:CGRectMake(13, 315, bigImageView.frame.size.width, 20) Font:13 Text:@""];
     desLabel.textColor = GRAY;
+//    desLabel.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.5];
+    desLabel.userInteractionEnabled = NO;
+    desLabel.textContainerInset = UIEdgeInsetsMake(0, 0, 0, 0);
+//    desLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight;
     [imageBgView addSubview:desLabel];
     
     //话题
@@ -849,9 +915,11 @@
     swipeLeft2.direction = UISwipeGestureRecognizerDirectionLeft;
     [sv2 addGestureRecognizer:swipeRight2];
     
-//    UITapGestureRecognizer * tap3 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
-//    [sv2 addGestureRecognizer:tap3];
-//    [tap3 release];
+    UITapGestureRecognizer * tap3 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+//    tap3.cancelsTouchesInView = NO;
+    tap3.delegate = self;
+    [sv2 addGestureRecognizer:tap3];
+    [tap3 release];
     
     imageBgView2 = [MyControl createViewWithFrame:CGRectMake(13, 30, self.view.frame.size.width-13*2, 350)];
     imageBgView2.backgroundColor = [UIColor whiteColor];
@@ -860,6 +928,7 @@
     [sv2 addSubview:imageBgView2];
     
 //    UITapGestureRecognizer * tap4 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap2:)];
+//    tap4.cancelsTouchesInView = NO;
 //    [imageBgView2 addGestureRecognizer:tap4];
 //    [tap4 release];
     
@@ -948,81 +1017,7 @@
     /***********************************/
     //底部按钮
     [self createBottom];
-//    bottomBgView = [MyControl createImageViewWithFrame:CGRectMake(0, self.view.frame.size.height-47, self.view.frame.size.width, 47) ImageName:@""];
-//    bottomBgView.image = [[UIImage imageNamed:@"front_bottomBg.png"] stretchableImageWithLeftCapWidth:5 topCapHeight:5];
-//    [bgView addSubview:bottomBgView];
     
-    //
-    
-    //63/2 60/2
-    //左右间隔20 中间间隔(width-40-5*31.5)/4
-//    float space = (self.view.frame.size.width-40-5*31.5)/4;
-//    NSArray * imageArray = @[@"front_zan.png", @"front_gift.png", @"front_comment.png", @"front_share.png", @"front_more.png"];
-//    for (int i=0; i<imageArray.count; i++) {
-//        UIButton * btn = [MyControl createButtonWithFrame:CGRectMake(20+i*(space+31.5), 9, 31.5, 30) ImageName:imageArray[i] Target:self Action:@selector(bottomClick:) Title:nil];
-//        [bottomBgView addSubview:btn];
-//        btn.tag = 100+i;
-//    }
-    
-//    if (self.isFromRandom) {
-//        [bigImageView setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", IMAGEURL, self.imageURL]] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
-//            if(error){
-//                NSLog(@"%@", error);
-//            }else{
-//                bigImageView.canClick = YES;
-//            }
-//            ENDLOADING;
-//            sv.hidden = NO;
-//            
-//            
-//            CGRect rect = bigImageView.frame;
-//            if(!error){
-//                
-//                float p = rect.size.width*image.size.height/image.size.width;
-//                rect.size.height = p;
-//                bigImageView.frame = rect;
-//            }
-//            
-//            
-//            //
-//            CGRect rect2 = desLabel.frame;
-//            if ([self.imageCmt isKindOfClass:[NSString class]] && [self.imageCmt length]>0) {
-//                desLabel.text = self.imageCmt;
-//                CGSize size;
-//                if ([MyControl isIOS7]) {
-//                    size = [desLabel.text boundingRectWithSize:CGSizeMake(rect2.size.width, 100) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:13]} context:nil].size;
-//                }else{
-//                    size = [desLabel.text sizeWithFont:[UIFont systemFontOfSize:13] constrainedToSize:CGSizeMake(rect2.size.width, 100) lineBreakMode:1];
-//                }
-//                
-//                rect2.size.height = size.height;
-//                rect2.origin.y = rect.origin.y+rect.size
-//                .height+10;
-//                desLabel.frame = rect2;
-//            }else{
-//                rect2.size.height = 0;
-//                rect2.origin.y = rect.origin.y+rect.size
-//                .height+10;
-//                desLabel.frame = rect2;
-//            }
-//            
-//            CGRect rect5 = imageBgView.frame;
-//            rect5.size.height = rect2.origin.y+rect2.size.height+10+20;
-//            imageBgView.frame = rect5;
-//            
-//            sv.contentSize = CGSizeMake(sv.frame.size.width, rect5.origin.y + rect5.size.height+50);
-//            
-//            sv2.contentSize = CGSizeMake(sv.frame.size.width, rect5.origin.y + rect5.size.height+50);
-//            
-//            CGRect image2Rect = imageBgView2.frame;
-//            if(imageBgView.frame.size.height>350){
-//                image2Rect.size.height = rect5.size.height;
-//            }else{
-//                image2Rect.size.height = 350;
-//            }
-//            imageBgView2.frame = image2Rect;
-//        }];
-//    }
 }
 #pragma mark -
 -(void)createBottom
@@ -1033,7 +1028,7 @@
     NSArray * selectedArray = @[@"front_zan_select", @"front_gift_select", @"front_comment_select", @"front_more_select"];
     NSArray * unSelectedArray = @[@"front_zan_unSelect", @"front_gift_unSelect", @"front_comment_unSelect", @"front_more_unSelect"];
     for (int i=0; i<selectedArray.count; i++) {
-        UIImageView * halfBall = [MyControl createImageViewWithFrame:CGRectMake(i*(self.view.frame.size.width/4.0), bottomBg.frame.size.height-50, self.view.frame.size.width/4.0, 50) ImageName:@"food_bottom_halfBall.png"];
+        UIImageView * halfBall = [MyControl createImageViewWithFrame:CGRectMake(i*(self.view.frame.size.width/4.0), bottomBg.frame.size.height-50, self.view.frame.size.width/4.0, 50) ImageName:@"food_bottom_halfBall1.png"];
         [bottomBg addSubview:halfBall];
         
         UIButton * ballBtn = [MyControl createButtonWithFrame:CGRectMake(halfBall.frame.origin.x+halfBall.frame.size.width/2.0-42.5/2.0, 2, 85/2.0, 94/2.0) ImageName:unSelectedArray[i] Target:self Action:@selector(ballBtnClick:) Title:nil];
@@ -1062,7 +1057,7 @@
 //        button.selected = NO;
 //    }
 //    btn.selected = YES;
-    int a = btn.tag-100;
+    NSInteger a = btn.tag-100;
     if (a == 0) {
         //zan
         [self zanBtnClick:btn];
@@ -1094,7 +1089,7 @@
             [model release];
             
             UILabel * label = (UILabel *)[imageBgView2 viewWithTag:301];
-            label.text = [NSString stringWithFormat:@"%d", self.sendersArray.count];
+            label.text = [NSString stringWithFormat:@"%ld", self.sendersArray.count];
             if(triangleIndex == 1){
                 [tv reloadData];
             }
@@ -1165,6 +1160,19 @@
         }];
     }];
 }
+#pragma mark - delegate
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+//    NSLog(@"%@", NSStringFromClass([touch.view class]));
+//    if ([NSStringFromClass([touch.view class]) isEqualToString:@"UITableViewCellContentView"]) {
+//        return NO;
+//    }
+    if (![NSStringFromClass([touch.view class]) isEqualToString:@"UIScrollView"]) {
+        return NO;
+    }
+    return YES;
+}
+
 #pragma mark -
 -(void)tap:(UIGestureRecognizer *)tap
 {
@@ -1315,7 +1323,7 @@
 #pragma mark -
 -(void)bottomClick:(UIButton *)btn
 {
-    NSLog(@"%d", btn.tag);
+    NSLog(@"%ld", btn.tag);
     if (btn.tag == 100) {
         [self zanBtnClick:btn];
     }else if(btn.tag == 101){
@@ -1340,7 +1348,7 @@
             [model release];
             
             UILabel * label = (UILabel *)[imageBgView2 viewWithTag:301];
-            label.text = [NSString stringWithFormat:@"%d", self.sendersArray.count];
+            label.text = [NSString stringWithFormat:@"%ld", self.sendersArray.count];
             if(triangleIndex == 1){
                 [tv reloadData];
             }
@@ -1542,7 +1550,7 @@
 //        }];
 //    }else{
 //        NSLog(@"微博");
-//        NSString * str = @"雷达报告发现一只萌宠，火速围观！http://home4pet.imengstar.com/（分享自@宠物星球社交应用）";
+//        NSString * str = @"雷达报告发现一只萌宠，火速围观！http://home4pet.imengstar.com/ #我是大萌星#";
 //        //        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:str image:screenshotImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
 //        //            if (response.responseCode == UMSResponseCodeSuccess) {
 //        //                NSLog(@"分享成功！");
@@ -1599,7 +1607,7 @@
     }
     
     if (!isReply) {
-        commentTextField.placeholder = @"写个评论呗";
+        commentTextField.placehoder = @"写个评论呗";
     }else{
         if ([self.usrIdArray[replyRow] isEqualToString:[USER objectForKey:@"usr_id"]]) {
             [MyControl popAlertWithView:self.view Msg:@"不能回复自己哦"];
@@ -1613,7 +1621,7 @@
             str = self.nameArray[replyRow];
         }
         
-        commentTextField.placeholder = [NSString stringWithFormat:@"回复 %@", str];
+        commentTextField.placehoder = [NSString stringWithFormat:@"回复 %@", str];
     }
     bgButton.hidden = NO;
     
@@ -1637,7 +1645,9 @@
     [self.view addSubview:commentBgView];
     
     //    commentTextView = [[UITextView alloc] initWithFrame:CGRectMake(5, 5, 250, 30)];
-    commentTextField = [MyControl createTextFieldWithFrame:CGRectMake(5, 5, 250, 30) placeholder:@"写个评论呗" passWord:NO leftImageView:nil rightImageView:nil Font:15];
+    commentTextField = [[HMEmotionTextView alloc] initWithFrame:CGRectMake(45, 5, 215, 30)];
+    commentTextField.font = [UIFont systemFontOfSize:15];
+    commentTextField.placehoder = @"写个评论呗";
     //    commentTextView.textColor = [UIColor lightGrayColor];
     //    commentTextView.text = @"写个评论呗";
     commentTextField.layer.cornerRadius = 5;
@@ -1653,15 +1663,173 @@
     [commentBgView addSubview:commentTextField];
     //    [commentTextView release];
     
+    //3，增加键盘button
+    self.emoticonButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    self.emoticonButton.frame = CGRectMake(8, 7.5, 25, 25);
+    //    [emoticonButton setTitle:@"图标" forState:UIControlStateNormal];
+    [self.emoticonButton setBackgroundImage:[UIImage imageNamed:@"compose_emoticonbutton_background_highlighted@2x"] forState:UIControlStateNormal];
+    [self.emoticonButton addTarget:self action:@selector(emoticonButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    [commentBgView addSubview:self.emoticonButton];
+    
+    // 键盘的frame(位置)即将改变, 就会发出UIKeyboardWillChangeFrameNotification
+    // 键盘即将弹出, 就会发出UIKeyboardWillShowNotification
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    // 键盘即将隐藏, 就会发出UIKeyboardWillHideNotification
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    
+    
     UIButton * sendButton = [MyControl createButtonWithFrame:CGRectMake(260, 10, 55, 20) ImageName:@"" Target:self Action:@selector(sendButtonClick) Title:@"发送"];
     [sendButton setTitleColor:BGCOLOR forState:UIControlStateNormal];
     [commentBgView addSubview:sendButton];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWasChange:) name:UIKeyboardDidChangeFrameNotification object:nil];
 }
+#pragma mark -
+#pragma mark - ck
+//键盘
+- (HMEmotionKeyboard *)kerboard
+{
+    if (!_kerboard) {
+        self.kerboard = [HMEmotionKeyboard keyboard];
+        self.kerboard.width = HMScreenW;
+        self.kerboard.height = 216;
+    }
+    return _kerboard;
+}
+//4.10.图标点击方法
+- (void)emoticonButtonClick{
+    if(isClick == NO)
+    {
+        [self.emoticonButton setBackgroundImage:[UIImage imageNamed:@"compose_keyboardbutton_background_highlighted@2x"] forState:UIControlStateNormal];
+        isClick = YES;
+    }else {
+        [self.emoticonButton setBackgroundImage:[UIImage imageNamed:@"compose_emoticonbutton_background_highlighted@2x"] forState:UIControlStateNormal];
+        //        [self.emoticonButton setTitle:@"Play" forState:UIControlStateNormal];
+        isClick = NO;
+    }
+    NSLog(@"打开表情键盘");
+    [commentTextField resignFirstResponder];
+    [self openEmotion];
+    
+    
+}
+#pragma mark - 键盘处理
+/**
+ *  键盘即将隐藏
+ */
+- (void)keyboardWillHide:(NSNotification *)note
+{
+    if (self.isChangingKeyboard) return;
+    
+    // 1.键盘弹出需要的时间
+    CGFloat duration = [note.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    
+    // 2.动画
+    [UIView animateWithDuration:duration animations:^{
+        //        self.toolbar.transform = CGAffineTransformIdentity;
+    }];
+}
+
+/**
+ *  键盘即将弹出
+ */
+- (void)keyboardWillShow:(NSNotification *)note
+{
+    // 1.键盘弹出需要的时间
+    CGFloat duration = [note.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    
+    // 2.动画
+    [UIView animateWithDuration:duration animations:^{
+        // 取出键盘高度
+        CGRect keyboardF = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+//        CGFloat keyboardH = keyboardF.size.height;
+        //        self.toolbar.transform = CGAffineTransformMakeTranslation(0, - keyboardH);
+    }];
+}
+
+#pragma mark - UITextViewDelegate
+/**
+ *  当用户开始拖拽scrollView时调用
+ */
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    [self.view endEditing:YES];
+}
+
+/**
+ *  当textView的文字改变就会调用
+ */
+- (void)textViewDidChange:(UITextView *)textView
+{
+    self.navigationItem.rightBarButtonItem.enabled = textView.hasText;
+}
+#pragma mark - 打开表情
+/**
+ *  打开表情
+ */
+- (void)openEmotion
+{
+    [self kerboard];
+    // 正在切换键盘
+    self.changingKeyboard = YES;
+    
+    if (commentTextField.inputView) { // 当前显示的是自定义键盘，切换为系统自带的键盘
+        commentTextField.inputView = nil;
+        
+        // 显示表情图片
+        //        self.toolbar.showEmotionButton = YES;
+    } else { // 当前显示的是系统自带的键盘，切换为自定义键盘
+        // 如果临时更换了文本框的键盘，一定要重新打开键盘
+        commentTextField.inputView = self.kerboard;
+        
+        // 不显示表情图片
+        //        self.toolbar.showEmotionButton = NO;
+    }
+    
+    // 关闭键盘
+    [commentTextField resignFirstResponder];
+    
+    // 更换完毕完毕
+    self.changingKeyboard = NO;
+    
+    //    [commentTextField becomeFirstResponder];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        // 打开键盘
+        [commentTextField becomeFirstResponder];
+    });
+}
+
+/**
+ *  当表情选中的时候调用
+ *
+ *  @param note 里面包含了选中的表情
+ */
+- (void)emotionDidSelected:(NSNotification *)note
+{
+    HMEmotion *emotion = note.userInfo[HMSelectedEmotion];
+    
+    // 1.拼接表情
+    [commentTextField appendEmotion:emotion];
+    
+    // 2.检测文字长度
+    [self textViewDidChange:commentTextField];
+}
+
+/**
+ *  当点击表情键盘上的删除按钮时调用
+ */
+- (void)emotionDidDeleted:(NSNotification *)note
+{
+    // 往回删
+    [commentTextField deleteBackward];
+}
+
+
+#pragma mark -
 -(void)sendButtonClick
 {
-    if(commentTextField.text == nil || commentTextField.text.length == 0){
+    if(commentTextField.realText == nil || commentTextField.realText.length == 0){
 //        [MyControl popAlertWithView:self.view Msg:@"内容为空"];
         return;
     }
@@ -1672,7 +1840,7 @@
     _request.requestMethod = @"POST";
     _request.timeOutSeconds = 20;
     
-    [_request setPostValue:commentTextField.text forKey:@"body"];
+    [_request setPostValue:commentTextField.realText forKey:@"body"];
     [_request setPostValue:self.img_id forKey:@"img_id"];
     if (isReply) {
         [_request setPostValue:self.usrIdArray[replyRow] forKey:@"reply_id"];
@@ -1724,6 +1892,7 @@
             }
         }
         
+        
         [commentTextField resignFirstResponder];
         
         //添加评论
@@ -1745,8 +1914,8 @@
             [self.nameArray insertObject:[USER objectForKey:@"name"] atIndex:0];
             //        [self.nameArray addObject:[USER objectForKey:@"name"]];
         }
-        NSLog(@"%@", commentTextField.text);
-        [self.bodyArray insertObject:commentTextField.text atIndex:0];
+//        NSLog(@"%@", commentTextField.text);
+        [self.bodyArray insertObject:commentTextField.realText atIndex:0];
         //    [self.bodyArray addObject:commentTextView.text];
         [self.createTimeArray insertObject:[NSString stringWithFormat:@"%.0f", [[NSDate date] timeIntervalSince1970]] atIndex:0];
         //    [self.createTimeArray addObject:[NSString stringWithFormat:@"%.0f", [[NSDate date] timeIntervalSince1970]]];
@@ -1754,7 +1923,8 @@
         [UIView animateWithDuration:0.3 animations:^{
             commentBgView.frame = CGRectMake(-self.view.frame.size.width, self.view.frame.size.height-216-40, 320, 40);
             //评论清空
-            commentTextField.placeholder = @"写个评论呗";
+            commentTextField.attributedText = nil;
+            commentTextField.placehoder = @"写个评论呗";
             commentTextField.text = nil;
             //            commentTextView.textColor = [UIColor lightGrayColor];
         }];
@@ -1762,7 +1932,7 @@
 //        [MyControl popAlertWithView:self.view Msg:@"评论成功"];
         //
         UILabel * label = (UILabel *)[imageBgView2 viewWithTag:302];
-        label.text = [NSString stringWithFormat:@"%d", self.nameArray.count];
+        label.text = [NSString stringWithFormat:@"%ld", self.nameArray.count];
         
 //        [commentTextField removeFromSuperview];
         //    if (!([self.likerTxArray isKindOfClass:[NSNull class]] || self.likerTxArray.count == 0)) {
@@ -1968,7 +2138,7 @@
             }else{
                 Alert_oneBtnView * oneBtn = [[Alert_oneBtnView alloc] initWithFrame:[UIScreen mainScreen].bounds];
                 if (array.count >= 10) {
-                    int cost = array.count*5;
+                    int cost = (int)array.count*5;
                     if (cost>100) {
                         cost = 100;
                     }
@@ -1980,17 +2150,16 @@
                         }else{
                             [ControllerManager addAlertWith:self Cost:cost SubType:1];
                         }
-
                         return;
                     }
                     oneBtn.type = 2;
-                    oneBtn.petsNum = array.count;
+                    oneBtn.petsNum = (int)array.count;
                     [oneBtn makeUI];
                     [[UIApplication sharedApplication].keyWindow addSubview:oneBtn];
                     [oneBtn release];
                 }else{
                     oneBtn.type = 2;
-                    oneBtn.petsNum = array.count;
+                    oneBtn.petsNum = (int)array.count;
                     [oneBtn makeUI];
                     [[UIApplication sharedApplication].keyWindow addSubview:oneBtn];
                     [oneBtn release];
@@ -2010,15 +2179,13 @@
 //                                UILabel * tempLabel = (UILabel *)[headerView viewWithTag:101];
 //                                tempLabel.text = [NSString stringWithFormat:@"%d", [tempLabel.text intValue]+1];
                                 if (array.count>=10) {
-                                    int cost = array.count*5;
+                                    int cost = (int)array.count*5;
                                     if (cost>100) {
                                         [USER setObject:[NSString stringWithFormat:@"%d", [[USER objectForKey:@"gold"] intValue]-100] forKey:@"gold"];
                                     }else{
                                         [USER setObject:[NSString stringWithFormat:@"%d", [[USER objectForKey:@"gold"] intValue]-cost] forKey:@"gold"];
                                     }
-                                    
                                 }
-                                
                             }
                             //                            [MyControl loadingSuccessWithContent:@"加入成功" afterDelay:0.5f];
                             ENDLOADING;
@@ -2053,7 +2220,6 @@
     NSString * stamp = [NSString stringWithFormat:@"%f", [date timeIntervalSince1970]];
     //t为时间差
     //24小时为期限
-
     //当前时间戳-时间戳 < 24h 才返回NO,说明未超过24小时
     if ([stamp intValue]-[[self.imageDict objectForKey:@"create_time"] intValue] < 24*60*60) {
         return NO;
@@ -2064,7 +2230,7 @@
 #pragma mark - 分享截图
 -(void)shareClick:(UIButton *)btn
 {
-    int index = btn.tag;
+    int index = (int)btn.tag;
     [MobClick event:@"photo_share"];
     
     //判断图片发布时间是否超过24小时
@@ -2177,7 +2343,7 @@
             }
         }
         
-        NSString * last = [NSString stringWithFormat:@"%@%@（分享自@宠物星球社交应用）", WEBBEGFOODAPI, self.img_id];
+        NSString * last = [NSString stringWithFormat:@"%@%@ #我是大萌星#", WEBBEGFOODAPI, self.img_id];
         if([[self.imageDict objectForKey:@"topic_name"] isKindOfClass:[NSString class]] && [[self.imageDict objectForKey:@"topic_name"] length]){
             str = [NSString stringWithFormat:@"%@ #%@# %@", str, [self.imageDict objectForKey:@"topic_name"], last];
         }else{
@@ -2275,7 +2441,7 @@
             [model release];
             
             UILabel * label = (UILabel *)[imageBgView2 viewWithTag:303];
-            label.text = [NSString stringWithFormat:@"%d", self.sharersArray.count];
+            label.text = [NSString stringWithFormat:@"%ld", self.sharersArray.count];
             if (triangleIndex == 3) {
                 [tv reloadData];
             }
@@ -2296,7 +2462,7 @@
 -(void)backClick:(UIButton *)btn
 {
     
-    NSLog(@"%d", btn.tag);
+    NSLog(@"%ld", btn.tag);
     __block FrontImageDetailViewController * blockSelf = self;
     
     int ori = triangleIndex;
@@ -2357,16 +2523,6 @@
         triangle.frame = rect;
     }];
     
-//    if (triangleIndex == 0) {
-//        
-//    }else if (triangleIndex == 1) {
-//        
-//    }else if (triangleIndex == 2) {
-//        
-//    }else{
-//        
-//    }
-    
     if (blockSelf->triangleIndex == 2) {
         blockSelf->desTv.hidden = NO;
         blockSelf->tv.hidden = YES;
@@ -2382,9 +2538,12 @@
 {
     NSLog(@"close");
     isInThisController = NO;
-    
 //    [ControllerManager deleTabBarViewController:self];
 //    __block FrontImageDetailViewController * blockSelf = self;
+    if(!self.isFromGoRecommend){
+        [ControllerManager showTabBar];
+    }
+    
     [UIView animateWithDuration:0.3 animations:^{
         self.view.alpha = 0;
     }completion:^(BOOL finished) {
@@ -2434,7 +2593,6 @@
         }
         UserInfoModel * model = self.sendersArray[indexPath.row];
         [cell configUI:model];
-        
         cell.backgroundColor = [UIColor clearColor];
         cell.selectionStyle = 0;
         return cell;
@@ -2444,7 +2602,6 @@
         if (!cell) {
             cell = [[[BackImageDetailCommentViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID3] autorelease];
         }
-        
         cell.backgroundColor = [UIColor clearColor];
         cell.selectionStyle = 0;
         cell.reportBlock = ^(){
@@ -2463,20 +2620,41 @@
         
         float textWidth = [UIScreen mainScreen].bounds.size.width-13*2-10*2-40-10-35;
         float cellHeight = 0;
-        
         CGSize size;
-        if ([MyControl isIOS7]) {
-            size = [self.bodyArray[indexPath.row] boundingRectWithSize:CGSizeMake(textWidth, 1000) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12]} context:nil].size;
+        //发言者
+        NSString * name1 = nil;
+        //被回复者
+        NSString * name2 = nil;
+        NSString * combineStr = nil;
+        NSString *nameStr = self.nameArray[indexPath.row];
+        if ([nameStr rangeOfString:@"&"].location == NSNotFound) {
+            combineStr = nameStr;
         }else{
-            size = [self.bodyArray[indexPath.row] sizeWithFont:[UIFont systemFontOfSize:12] constrainedToSize:CGSizeMake(textWidth, 1000) lineBreakMode:1];
+            name1 = [[nameStr componentsSeparatedByString:@"&"] objectAtIndex:0];
+            name2 = [[nameStr componentsSeparatedByString:@"&"] objectAtIndex:1];
+            if ([name2 rangeOfString:@"@"].location != NSNotFound) {
+                name2 = [[name2 componentsSeparatedByString:@"@"] objectAtIndex:1];
+            }
+            combineStr = name1;
         }
-//        CGSize size = [self.bodyArray[indexPath.row] boundingRectWithSize:CGSizeMake(textWidth, 100) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12]} context:nil].size;
+        NSString *tempString = nil;
+        if(name2 != nil){
+            tempString = [NSString stringWithFormat:@"回复 %@：%@", name2, self.bodyArray[indexPath.row]];
+        } else {
+            tempString = self.bodyArray[indexPath.row];
+        }
+        if ([MyControl isIOS7]) {
+            size = [tempString boundingRectWithSize:CGSizeMake(textWidth, 1000) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12]} context:nil].size;
+        }else{
+            size = [tempString sizeWithFont:[UIFont systemFontOfSize:12] constrainedToSize:CGSizeMake(textWidth, 1000) lineBreakMode:1];
+        }
+        
         if (size.height>15.0) {
             cellHeight = 53+size.height-15;
         }else{
-            cellHeight = 53.0;
+            cellHeight = 55.0;
         }
-//        NSLog(@"%f", cellHeight);
+        //
         [cell configUIWithName:self.nameArray[indexPath.row] Cmt:self.bodyArray[indexPath.row] Time:self.createTimeArray[indexPath.row] CellHeight:cellHeight textSize:size Tx:self.cmtTxArray[indexPath.row] isTest:isTest];
         return cell;
     }else{
@@ -2492,7 +2670,7 @@
         return cell;
     }
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 //    return 53.0f;
     if (triangleIndex == 2) {
@@ -2501,23 +2679,46 @@
         if (self.bodyArray[indexPath.row] == nil) {
             return 53.0;
         }
-        
         CGSize size;
-        if ([MyControl isIOS7]) {
-            size = [self.bodyArray[indexPath.row] boundingRectWithSize:CGSizeMake(textWidth, 1000) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12]} context:nil].size;
+        //发言者
+        NSString * name1 = nil;
+        //被回复者
+        NSString * name2 = nil;
+        NSString * combineStr = nil;
+        NSString *nameStr = self.nameArray[indexPath.row];
+        if ([nameStr rangeOfString:@"&"].location == NSNotFound) {
+            combineStr = nameStr;
         }else{
-            size = [self.bodyArray[indexPath.row] sizeWithFont:[UIFont systemFontOfSize:12] constrainedToSize:CGSizeMake(textWidth, 1000) lineBreakMode:1];
+            name1 = [[nameStr componentsSeparatedByString:@"&"] objectAtIndex:0];
+            name2 = [[nameStr componentsSeparatedByString:@"&"] objectAtIndex:1];
+            if ([name2 rangeOfString:@"@"].location != NSNotFound) {
+                name2 = [[name2 componentsSeparatedByString:@"@"] objectAtIndex:1];
+            }
+            combineStr = name1;
+        }
+        NSString *tempString = nil;
+        if(name2 != nil){
+            tempString = [NSString stringWithFormat:@"回复 %@：%@", name2, self.bodyArray[indexPath.row]];
+        } else {
+            tempString = self.bodyArray[indexPath.row];
+        }
+        if ([MyControl isIOS7]) {
+            size = [tempString boundingRectWithSize:CGSizeMake(textWidth, 1000) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12]} context:nil].size;
+        }else{
+            size = [tempString sizeWithFont:[UIFont systemFontOfSize:12] constrainedToSize:CGSizeMake(textWidth, 1000) lineBreakMode:1];
         }
 //        CGSize size = [self.bodyArray[indexPath.row] boundingRectWithSize:CGSizeMake(textWidth, 100) options:1 attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12]} context:nil].size;
+        if (name2 != nil) {
+            NSLog(@"=====%@--%f", tempString, size.height);
+        }
         if (size.height>15.0) {
             return 53+size.height-15;
         }else{
-            return 53.0;
+            return 55.0;
         }
     }else{
         return 53.0;
     }
-    
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -2530,7 +2731,7 @@
 //        [self presentViewController:vc animated:YES completion:nil];
     }else if (triangleIndex == 2) {
         isReply = YES;
-        replyRow = indexPath.row;
+        replyRow = (int)indexPath.row;
         [self commentClick];
 //        vc.usr_id = self.usrIdArray[indexPath.row];
 //        [self presentViewController:vc animated:YES completion:nil];
@@ -2549,7 +2750,6 @@
         [vc didMoveToParentViewController:self];
 //        [[UIApplication sharedApplication].keyWindow addSubview:vc.view];
     }
-    
     [vc release];
 }
 
@@ -2561,8 +2761,7 @@
         [USER setObject:@"1" forKey:@"guide_detail_back_comment"];
         [self createGuide2];
     }
-    
-    NSLog(@"swipeLeft");
+//    NSLog(@"swipeLeft");
     if (imageNotExist) {
         [MyControl popAlertWithView:self.view  Msg:@"网络或数据异常"];
         return;
@@ -2592,7 +2791,6 @@
     t.duration = 0.5;
     t.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
     [sv.layer addAnimation:t forKey:@"Transition"];
-    
     [sv2.layer addAnimation:t forKey:@"Transition"];
 }
 -(void)swipeRight:(UISwipeGestureRecognizer *)swipeRight
@@ -2636,7 +2834,6 @@
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
     //清除缓存图片
     SDImageCache * cache = [SDImageCache sharedImageCache];
     [cache clearMemory];

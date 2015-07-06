@@ -12,6 +12,9 @@
 
 #import <UIKit/UIKit.h>
 
+#import "HMTextView.h"
+@class HMEmotion;
+
 typedef NS_ENUM(NSUInteger, XHTextViewInputViewType) {
     XHTextViewNormalInputType = 0,
     XHTextViewTextInputType,
@@ -20,6 +23,12 @@ typedef NS_ENUM(NSUInteger, XHTextViewInputViewType) {
 };
 
 @interface XHMessageTextView : UITextView
+
+@property (nonatomic, copy) NSString *placehoder;
+@property (nonatomic, strong) UIColor *placehoderColor;
+@property (nonatomic, weak) UILabel *placehoderLabel;
+
+
 
 /**
  *  提示用户输入的标语
@@ -53,5 +62,18 @@ typedef NS_ENUM(NSUInteger, XHTextViewInputViewType) {
  *  @return 返回占据行数
  */
 + (NSUInteger)numberOfLinesForMessage:(NSString *)text;
+
+
+/**
+ *  拼接表情到最后面
+ */
+- (void)appendEmotion:(HMEmotion *)emotion;
+
+/**
+ *  具体的文字内容
+ */
+- (NSString *)realText;
+
+
 
 @end

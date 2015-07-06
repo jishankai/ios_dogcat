@@ -26,7 +26,7 @@
 @property(nonatomic,copy)NSString * txType;
 @property(nonatomic,copy)NSString * usr_id;
 @property(nonatomic,copy)void (^jumpToUserInfo)(UIImage *, NSString *);
-@property(nonatomic,copy)void (^cellClick)(int);
+@property(nonatomic,copy)void (^cellClick)(NSInteger);
 @property (nonatomic,assign)NSInteger num;
 -(void)configUI:(UserInfoModel *)model isLiker:(BOOL)isLiker;
 @end

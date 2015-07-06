@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "GiftsModel.h"
 
 @interface ControllerManager : NSObject
 
@@ -42,14 +43,14 @@
 +(NSString *)returnProvinceAndCityWithCityNum:(NSString *)cityNum;
 
 //传入item_id，返回所有礼物的信息的数组
-+(NSArray *)returnAllGiftsArray;
+//+(NSArray *)returnAllGiftsArray;
 //传入item_id，返回该礼物的信息字典dict
-+(NSDictionary *)returnGiftDictWithItemId:(NSString *)itemId;
+//+(NSDictionary *)returnGiftDictWithItemId:(NSString *)itemId;
 
 //传入rank值，返回官职名称
 +(NSString *)returnPositionWithRank:(NSString *)rank;
 //传入礼物item_id，返回对应的动态文字
-+(NSString *)returnActionStringWithItemId:(NSString *)item_id;
+//+(NSString *)returnActionStringWithItemId:(NSString *)item_id;
 
 //传入贡献值，返回对应下一级所需贡献值
 +(int)returnContributionOfNeedWithContribution:(NSString *)con;
@@ -72,7 +73,7 @@
 
 +(void)loadPetList;
 
-+(void)addAlertWith:(UIViewController *)vc Cost:(int)cost SubType:(int)subType;
++(void)addAlertWith:(UIViewController *)vc Cost:(NSInteger)cost SubType:(int)subType;
 
 //创建单例队列
 +(NSOperationQueue *)createOperationQueue;
@@ -80,4 +81,19 @@
 //检查强制更新用
 +(NSInteger)getCheckUpdate;
 +(void)setCheckUpdate;
+
+//tabBar的隐藏和显示
++(void)hideTabBar;
++(void)showTabBar;
+
+#pragma mark - 更新礼物列表
++(void)updateGiftList;
++(NSDictionary *)returnTotalGiftDict;
++(GiftsModel *)returnGiftsModelWithGiftId:(NSString *)giftId;
+
+#pragma mark -
++(void)createLoading;
++(void)removecatLoading;
+
++ (NSAttributedString *)changToAttributedText:(NSString *)str;
 @end

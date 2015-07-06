@@ -13,7 +13,7 @@
 //    UIImageView * sex;
     NSString *usr_id;
     
-    int lineNum;
+    NSInteger lineNum;
 }
 @property (retain, nonatomic) IBOutlet UIImageView *circleBg;
 @property (retain, nonatomic) IBOutlet UIButton *headBtn;
@@ -23,7 +23,7 @@
 @property (retain, nonatomic) IBOutlet UILabel *name;
 @property (retain, nonatomic) IBOutlet UILabel *contribution;
 
--(void)modifyWithBOOL:(BOOL)isThis lineNum:(int)num;
+-(void)modifyWithBOOL:(BOOL)isThis lineNum:(NSInteger)num;
 -(void)configUI:(CountryMembersModel *)model;
 
 @end

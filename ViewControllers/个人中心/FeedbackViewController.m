@@ -9,7 +9,7 @@
 #import "FeedbackViewController.h"
 #import "IQKeyboardManager.h"
 
-#define DefaultText @"想表扬，想吐槽，有好点子，通通告诉我们吧，宠物星球会在您的帮助下进步的~谢谢~"
+#define DefaultText @"想表扬，想吐槽，有好点子，通通告诉我们吧，我是大萌星会在您的帮助下进步的~谢谢~"
 #define UMENG_APPKEY @"538fddca56240b40a105fcfb"
 @interface FeedbackViewController ()
 
@@ -39,6 +39,8 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    self.navigationController.navigationBarHidden = YES;
+    
     [self createBg];
 
     self.umFeedback = [UMFeedback sharedInstance];
@@ -86,7 +88,8 @@
 - (void)backBtnClick:(UIButton *)sender
 {
     NSLog(@"返回");
-    [self dismissViewControllerAnimated:YES completion:nil];
+//    [self dismissViewControllerAnimated:YES completion:nil];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)makeUI

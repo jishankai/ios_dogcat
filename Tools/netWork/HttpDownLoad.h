@@ -18,9 +18,9 @@
 @interface HttpDownLoad : NSObject<NSURLConnectionDataDelegate>
 //创建属性NSMuTableData  以及NSURLConnection
 //保存发起的请求指针  为什么？需要在取消时候使用
-@property(nonatomic,retain)NSURLConnection*connection;
-//保存下载的数据
-@property(nonatomic,retain)NSMutableData*data;
+@property(nonatomic,retain)NSURLConnection *connection;
+//保存下载的数据,4.27
+@property(nonatomic,retain)NSMutableData *data;
 //设置协议的代理
 @property(nonatomic,assign)id<HttpDownloadDelegate>delegate;
 

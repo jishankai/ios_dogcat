@@ -232,15 +232,15 @@
     SingleTalkModel * model = self.dataArrayTemp[indexPath.row];
     
     if (self.selectArray.count == 0) {
-        [cell modifyWith:model row:indexPath.row selected:NO];
+        [cell modifyWith:model row:(int)indexPath.row selected:NO];
     }
     for (int i=0; i<self.selectArray.count; i++) {
         if ([self.selectArray[i] intValue] == indexPath.row) {
-            [cell modifyWith:model row:indexPath.row selected:YES];
+            [cell modifyWith:model row:(int)indexPath.row selected:YES];
             break;
         }else{
             if (i == self.selectArray.count-1) {
-                [cell modifyWith:model row:indexPath.row selected:NO];
+                [cell modifyWith:model row:(int)indexPath.row selected:NO];
             }
         }
     }

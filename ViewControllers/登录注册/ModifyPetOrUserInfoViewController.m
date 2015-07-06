@@ -245,7 +245,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         [self.otherArray addObject:str];
     }
     self.tempArray = self.catArray;
-    count = self.catArray.count;
+    count = (int)self.catArray.count;
 }
 
 #pragma mark - createUI
@@ -669,7 +669,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
     }else if(woman.selected){
         self.u_gender = 2;
     }
-    NSLog(@"u_name:%@--u_gender:%d--u_city:%d", self.u_name, self.u_gender, self.u_city);
+    NSLog(@"u_name:%@--u_gender:%ld--u_city:%ld", self.u_name, self.u_gender, self.u_city);
     [self userModifyInfo];
 }
 -(void)userModifyInfo
@@ -677,8 +677,8 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
     LOADING;
 //    [MMProgressHUD setPresentationStyle:MMProgressHUDPresentationStyleShrink];
 //    [MMProgressHUD showWithStatus:@"修改中..."];
-    NSString * code = [NSString stringWithFormat:@"u_city=%d&u_gender=%d&u_name=%@", self.u_city, self.u_gender, [self.u_name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-    NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"u_city=%d&u_gender=%ddog&cat", self.u_city, self.u_gender]];
+    NSString * code = [NSString stringWithFormat:@"u_city=%ld&u_gender=%ld&u_name=%@", self.u_city, self.u_gender, [self.u_name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"u_city=%ld&u_gender=%lddog&cat", self.u_city, self.u_gender]];
     NSString * url = [NSString stringWithFormat:@"%@%@&sig=%@&SID=%@", MODIFYUSERINFOAPI, code, sig, [ControllerManager getSID]];
     NSLog(@"%@", url);
     httpDownloadBlock * request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock * load) {
@@ -686,13 +686,13 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
             NSLog(@"%@", load.dataDict);
             if ([[[load.dataDict objectForKey:@"data"] objectForKey:@"isSuccess"] intValue]) {
                 [USER setObject:self.u_name forKey:@"name"];
-                [USER setObject:[NSString stringWithFormat:@"%d", self.u_gender] forKey:@"gender"];
-                [USER setObject:[NSString stringWithFormat:@"%d", self.u_city] forKey:@"city"];
+                [USER setObject:[NSString stringWithFormat:@"%ld", self.u_gender] forKey:@"gender"];
+                [USER setObject:[NSString stringWithFormat:@"%ld", self.u_city] forKey:@"city"];
             }
             if (self.oriUserImage) {
                 [self postUserImage];
             }else{
-                self.refreshUserInfo(self.u_name, self.u_gender, self.u_city, self.oriUserImage);
+                self.refreshUserInfo(self.u_name, (int)self.u_gender, (int)self.u_city, self.oriUserImage);
                 ENDLOADING;
                 [MyControl popAlertWithView:[UIApplication sharedApplication].keyWindow Msg:@"修改成功"];
 //                [MMProgressHUD dismissWithSuccess:@"修改成功" title:nil afterDelay:0.5];
@@ -795,7 +795,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         NSData * data = UIImageJPEGRepresentation(self.oriUserImage, 0.1);
         BOOL a = [data writeToFile:pngFilePath atomically:YES];
         NSLog(@"用户头像存放结果：%d", a);
-        self.refreshUserInfo(self.u_name, self.u_gender, self.u_city, self.oriUserImage);
+        self.refreshUserInfo(self.u_name, (int)self.u_gender, (int)self.u_city, self.oriUserImage);
     }
     ENDLOADING;
     [MyControl popAlertWithView:[UIApplication sharedApplication].keyWindow Msg:@"修改成功"];
@@ -962,33 +962,33 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
                 typeTag = 1;
                 
                 self.tempArray = self.catArray;
-                count = self.catArray.count;
+                count = (int)self.catArray.count;
                 if (num<self.catArray.count) {
                     self.detailName = self.catArray[num];
                 }else{
-                    num = self.catArray.count-1;
+                    num = (int)self.catArray.count-1;
                     self.detailName = self.catArray[self.catArray.count-1];
                 }
             }else if(row == 1){
                 typeTag = 2;
                 
                 self.tempArray = self.dogArray;
-                count = self.dogArray.count;
+                count = (int)self.dogArray.count;
                 if (num<self.dogArray.count) {
                     self.detailName = self.dogArray[num];
                 }else{
-                    num = self.dogArray.count-1;
+                    num = (int)self.dogArray.count-1;
                     self.detailName = self.dogArray[self.dogArray.count-1];
                 }
             }else{
                 typeTag = 3;
                 
                 self.tempArray = self.otherArray;
-                count = self.otherArray.count;
+                count = (int)self.otherArray.count;
                 if (num<self.otherArray.count) {
                     self.detailName = self.otherArray[num];
                 }else{
-                    num = self.otherArray.count-1;
+                    num = (int)self.otherArray.count-1;
                     self.detailName = self.otherArray[self.otherArray.count-1];
                 }
             }
@@ -996,7 +996,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
             [picker reloadComponent:1];
         }else{
             self.detailName = self.tempArray[row];
-            num = row;
+            num = (int)row;
         }
         //每次都确定type
         if (typeTag == 1) {
@@ -1011,7 +1011,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         if (component == PROVINCE_COMPONENT) {
             selectedProvince = [province objectAtIndex: row];
             //取出省
-            NSDictionary *tmp = [NSDictionary dictionaryWithDictionary: [areaDic objectForKey: [NSString stringWithFormat:@"%d", row]]];
+            NSDictionary *tmp = [NSDictionary dictionaryWithDictionary: [areaDic objectForKey: [NSString stringWithFormat:@"%ld", row]]];
             NSDictionary *dic = [NSDictionary dictionaryWithDictionary: [tmp objectForKey: selectedProvince]];
             //取出城市
             NSArray *cityArray = [dic allKeys];
@@ -1055,9 +1055,9 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         }
     }else if(pickerView == picker3){
         if (component == 0) {
-            year = row;
+            year = (int)row;
         }else{
-            month = row;
+            month = (int)row;
         }
     }
     
@@ -1082,9 +1082,9 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
         }
     }else{
         if (component == 0) {
-            return [NSString stringWithFormat:@"%2d 岁", row];
+            return [NSString stringWithFormat:@"%2ld 岁", row];
         }else{
-            return [NSString stringWithFormat:@"%2d 个月", row];
+            return [NSString stringWithFormat:@"%2ld 个月", row];
         }
 
     }
@@ -1154,8 +1154,8 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
     }else if([provinceStr isEqualToString: cityStr]){
         cityStr = @"";
     }
-    NSLog(@"------------%d", (provinceIndex+10)*100+cityIndex);
-    self.u_city = (provinceIndex+10)*100+cityIndex;
+    NSLog(@"------------%ld", (provinceIndex+10)*100+cityIndex);
+    self.u_city = (provinceIndex+10)*100 + cityIndex;
     NSString *showMsg = [NSString stringWithFormat: @"%@%@", provinceStr, cityStr];
     tfCity.text = showMsg;
     
@@ -1386,7 +1386,7 @@ static NSString * const kAFAviarySecret = @"389160adda815809";
     // Create a context from the session with the high res image.
     AFPhotoEditorContext *context = [session createContextWithImage:highResImage];
     
-    __block RegisterViewController * blockSelf = self;
+    __block ModifyPetOrUserInfoViewController * blockSelf = self;
     
     [context render:^(UIImage *result) {
         if (result) {

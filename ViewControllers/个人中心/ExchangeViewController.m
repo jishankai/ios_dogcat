@@ -242,8 +242,8 @@
 }
 -(void)headClick:(UIButton *)btn
 {
-    NSLog(@"tag:%d", btn.tag);
-    int x = btn.tag-2000;
+    NSLog(@"tag:%ld", (long)btn.tag);
+    int x = (int)btn.tag-2000;
     foodNum.text = [NSString stringWithFormat:@"%@", [self.userPetListArray[x] food]];
     
     [MyControl setImageForBtn:headBtn Tx:[self.userPetListArray[x] tx] isPet:YES isRound:YES];
@@ -314,7 +314,7 @@
         [cell configUI:self.dataArray[indexPath.row]];
         __block ExchangeViewController * blockSelf = self;
         cell.exchange = ^(){
-            [blockSelf exchangeBtnClick:indexPath.row];
+            [blockSelf exchangeBtnClick:(int)indexPath.row];
         };
     }
     
@@ -332,7 +332,7 @@
 #pragma mark - collectionDelegate
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"%d", indexPath.row);
+    NSLog(@"%ld", indexPath.row);
     ExchangeDetailView * detail = [[ExchangeDetailView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     detail.aid = self.tempAid;
     detail.foodNum = foodNum.text;
@@ -435,15 +435,15 @@
         [self rel];
     }
 }
--(void)didSelected:(NIDropDown *)sender Line:(int)Line Words:(NSString *)Words
+-(void)didSelected:(NIDropDown *)sender Line:(NSInteger)Line Words:(NSString *)Words
 {
-    NSLog(@"%d--%@", Line, Words);
+    NSLog(@"%ld--%@", Line, Words);
     if (Line == 0) {
         self.dataArray = [NSMutableArray arrayWithArray:self.tempDataArray];
         [collection reloadData];
     }else if(Line == 1){
         [self.dataArray removeAllObjects];
-        for (int i=0; i<self.tempDataArray.count; i++) {
+        for (NSInteger i=0; i<self.tempDataArray.count; i++) {
             if ([[self.tempDataArray[i] item_id] intValue]/1000 == 1) {
                 [self.dataArray addObject:self.tempDataArray[i]];
             }
@@ -451,7 +451,7 @@
         [collection reloadData];
     }else if(Line == 2){
         [self.dataArray removeAllObjects];
-        for (int i=0; i<self.tempDataArray.count; i++) {
+        for (NSInteger i=0; i<self.tempDataArray.count; i++) {
             if ([[self.tempDataArray[i] item_id] intValue]/1000 == 2) {
                 [self.dataArray addObject:self.tempDataArray[i]];
             }

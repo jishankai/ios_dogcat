@@ -19,4 +19,7 @@
 
 @property (nonatomic,retain)NSMutableArray * topicNameArray;
 @property (nonatomic,retain)NSMutableArray * topicIdArray;
+
+@property (nonatomic,retain)NSMutableArray * topicArray;
+
 @end

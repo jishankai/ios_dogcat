@@ -270,7 +270,7 @@
 }
 
 + (NSString *)convertToSystemEmoticons:(NSString *)text {
-    int allEmoticsCount = [Emoji allEmoji].count;
+    NSInteger allEmoticsCount = [Emoji allEmoji].count;
     NSMutableString *retText = [[NSMutableString alloc] initWithString:text];
     for(int i=0; i<allEmoticsCount; ++i) {
         NSRange range;

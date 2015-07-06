@@ -18,7 +18,7 @@
 
 #import "MobClick.h"
 
-#import "PetRecommendViewController.h"
+//#import "PetRecommendViewController.h"
 
 //
 #import "FrontImageDetailViewController.h"
@@ -50,11 +50,9 @@
     if (uuid == nil || uuid.length == 0) {
         [Keychain save:KEY_UDID data:[OpenUDID value]];
     }
-    
     NSLog(@"%@", [Keychain load:KEY_UDID]);
 //    NSLog(@"%@", NSTemporaryDirectory());
 //    [NSSearchPathForDirectoriesInDomains(NSTemporaryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    
 //    http://itunes.apple.com/us/app/id932758265
     
     [USER setObject:[Keychain load:KEY_UDID] forKey:@"UDID"];
@@ -74,12 +72,12 @@
     
     [UMSocialData setAppKey:@"538fddca56240b40a105fcfb"];
     //微信
-    [UMSocialWechatHandler setWXAppId:@"wxc8c5912cc28194b6" appSecret:@"a5287571075736dc5760aafc1e5ff34e" url:@"http://home4pet.imengstar.com"];
+    [UMSocialWechatHandler setWXAppId:@"wx8461378bbf9bda70" appSecret:@"60dd005c505bf45fe1b2e61af48e58c0" url:@"http://home4pet.imengstar.com"];
     //微博
     [UMSocialSinaHandler openSSOWithRedirectURL:@"http://sns.whalecloud.com/sina2/callback"];
     
-//    [UMSocialWechatHandler setWXAppId:@"wxc8c5912cc28194b6" appSecret:@"a5287571075736dc5760aafc1e5ff34e" url:@"http://imengstar.com"];
-//    [UMSocialWechatHandler setWXAppId:@"wxc8c5912cc28194b6" url:@"http://imengstar.com"];
+//    [UMSocialWechatHandler setWXAppId:@"wx8461378bbf9bda70" appSecret:@"a5287571075736dc5760aafc1e5ff34e" url:@"http://imengstar.com"];
+//    [UMSocialWechatHandler setWXAppId:@"wx8461378bbf9bda70" url:@"http://imengstar.com"];
 //    [UMSocialConfig set];
 //    新浪
 //    阿猫阿狗
@@ -90,8 +88,8 @@
 //    App Secret：e3e8a9fde01202ea049095f79ddc904e
     
 //    微信
-//    AppID：wxc8c5912cc28194b6
-//    AppSecret：a5287571075736dc5760aafc1e5ff34e
+//    AppID：wx8461378bbf9bda70
+//    AppSecret：60dd005c505bf45fe1b2e61af48e58c0
     
     //渠道，策略
 //  channelId为nil或@""时默认AppStore
@@ -112,7 +110,7 @@
     /**********环信***********/
 //    aps_development.cer
     NSString * apnsCertName = @"imengstar";
-    [[EaseMob sharedInstance] registerSDKWithAppKey:@"aidigame#imengstar" apnsCertName:apnsCertName];
+    [[EaseMob sharedInstance] registerSDKWithAppKey:@"aidigame#imengstar" apnsCertName:apnsCertName];//aidigame#imengstar
     [[EaseMob sharedInstance] application:application didFinishLaunchingWithOptions:launchOptions];
 
     [self registerRemoteNotification];
@@ -197,9 +195,13 @@
         [USER setObject:@"0" forKey:@"guide_detail_back_comment"];
         [USER setObject:@"0" forKey:@"guide_discover"];
         [USER setObject:@"0" forKey:@"guide_petmain"];
+        [USER setObject:@"0" forKey:@"guide_handpick"];
+        [USER setObject:@"0" forKey:@"guide_masselection"];
+        [USER setObject:@"0" forKey:@"guide_handpick_recom"];
         
         [USER setObject:@"0" forKey:@"setMsgDetail"];
         [USER setObject:@"1" forKey:@"showCostAlert"];
+//        [USER setObject:@"1" forKey:@"notShowVoteCostAlert"];
         [USER setObject:versionKey forKey:@"versionKey"];
         
         [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
@@ -288,6 +290,7 @@
 //系统方法
 -(void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
+    NSLog(@"deviceToken：%@", deviceToken);
     //SDK方法调用
     [[EaseMob sharedInstance] application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
@@ -303,6 +306,7 @@
                                           otherButtonTitles:nil];
     [alert show];
 }
+
 
 //系统方法
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo

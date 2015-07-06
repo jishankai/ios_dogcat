@@ -131,8 +131,8 @@
         cell = [[[NSBundle mainBundle] loadNibNamed:@"DefaultPetCell" owner:self options:nil] objectAtIndex:0];
     }
     UserPetListModel *model = self.userPetListArray[indexPath.row];
-    cell.defaultBtnClick = ^(int a, NSString * master_id){
-        NSLog(@"clickDefaultPet:%d", a);
+    cell.defaultBtnClick = ^(NSInteger a, NSString * master_id){
+        NSLog(@"clickDefaultPet:%ld",a);
         //请求切换默认宠物API
         [self changeDefaultPet:[self.userPetListArray[a] aid] MasterId:master_id];
     };
@@ -147,7 +147,7 @@
 
     return cell;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 72.0f;
 }

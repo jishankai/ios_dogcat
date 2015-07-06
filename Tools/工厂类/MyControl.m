@@ -299,7 +299,7 @@
     return data;
 }
 
-//路径文件转NSArray
+//data转NSDictionary
 +(NSDictionary *)returnDictionaryWithData:(NSData *)data
 {
     if (data.length == 0) {
@@ -396,17 +396,19 @@
         sourceImage = [self image:sourceImage fitInSize:CGSizeMake(w*p, h*p)];
 //        sourceImage = [self OriginImage:sourceImage scaleToSize:CGSizeMake(w*p, h*p)];
     }else if(h>w && sourceImage.size.height>2000){
-        p = 2000/h;
-        sourceImage = [self image:sourceImage fitInSize:CGSizeMake(w*p, h*p)];
+        if (h/w < 3) {
+            p = 2000/h;
+            sourceImage = [self image:sourceImage fitInSize:CGSizeMake(w*p, h*p)];
+        }
     }
     NSLog(@"%f--%f", sourceImage.size.width, sourceImage.size.height);
     CGFloat compression = 1.0f;
-    float maxFileSize = 128*1024;
+    float maxFileSize = 1024*1024;
     
     NSData *imageData = UIImageJPEGRepresentation(sourceImage, compression);
 //    3746443 1748174 56556
 //    13278499 4440060 284031
-    NSLog(@"%d", imageData.length);
+    NSLog(@"%ld", imageData.length);
     compression = maxFileSize / [imageData length];
 //    int count = 0;
 //    while (imageData.length>maxFileSize) {
@@ -422,7 +424,7 @@
     if (compression < 1) {
         imageData = UIImageJPEGRepresentation(sourceImage, compression);
     }
-    NSLog(@"======压缩后的图片大小：%d======", imageData.length);
+    NSLog(@"======压缩后的图片大小：%ld======", imageData.length);
     return imageData;
 }
 
@@ -441,17 +443,17 @@
     }
     NSLog(@"%f--%f", sourceImage.size.width, sourceImage.size.height);
     CGFloat compression = 1.0f;
-    float maxFileSize = 128*1024;
+    float maxFileSize = 1024*1024;
     
     NSData *imageData = UIImageJPEGRepresentation(sourceImage, compression);
     //    3746443 1748174 56556
     //    13278499 4440060 284031
-    NSLog(@"%d", imageData.length);
+    NSLog(@"%ld", imageData.length);
     compression = maxFileSize / [imageData length];
         if (compression < 1) {
         imageData = UIImageJPEGRepresentation(sourceImage, compression);
     }
-    NSLog(@"======压缩后的图片大小：%d======", imageData.length);
+    NSLog(@"======压缩后的图片大小：%ld======", imageData.length);
     return imageData;
 }
 
@@ -584,7 +586,9 @@
         [UIView animateKeyframesWithDuration:0.2 delay:1.5 options:0 animations:^{
             pop.bgView.alpha = 0;
         } completion:^(BOOL finished) {
-            [pop removeFromSuperview];
+            if (keyView != nil) {
+                [pop removeFromSuperview];
+            }
         }];
     }];
 }
@@ -791,16 +795,16 @@
     CGFloat compression = 0.9f;
     CGFloat maxCompression = 0.1f;
     /**
-     *  128kb
+     *  1024kb
      */
-    int maxFileSize = 128*1024;
+    int maxFileSize = 1024*1024;
     NSData *imageData = UIImageJPEGRepresentation(image, compression);
     while ([imageData length] > maxFileSize && compression > maxCompression)
     {
         compression -= 0.1;
         imageData = UIImageJPEGRepresentation(image, compression);
     }
-    NSLog(@"======压缩后的图片大小：%d======", imageData.length);
+    NSLog(@"======压缩后的图片大小：%ld======",imageData.length);
     return imageData;
 }
 
@@ -903,15 +907,15 @@
     /*指定宽高，1l表示如果缩略图大于原图不处理，.src表示返回原格式图片，避免变形*/
     NSString * string = nil;
     if(w == 0){
-        string = [NSString stringWithFormat:@"%@%@@%dh_1l.src", type, name, h];
+        string = [NSString stringWithFormat:@"%@%@@%ldh_1l.src", type, name, h];
     }else if(h == 0){
-        string = [NSString stringWithFormat:@"%@%@@%dw_1l.src", type, name, w];
+        string = [NSString stringWithFormat:@"%@%@@%ldw_1l.src", type, name, w];
     }else{
         //如果是头像就进行自动裁剪处理1e_1c伴随使用
         if ([type isEqualToString:THUMBPETTXURL] || [type isEqualToString:THUMBUSERTXURL]) {
-            string = [NSString stringWithFormat:@"%@%@@%dw_%dh_1l_1e_1c.src", type, name, w, h];
+            string = [NSString stringWithFormat:@"%@%@@%ldw_%ldh_1l_1e_1c.src", type, name, w, h];
         }else{
-            string = [NSString stringWithFormat:@"%@%@@%dw_%dh_1l.src", type, name, w, h];
+            string = [NSString stringWithFormat:@"%@%@@%ldw_%ldh_1l.src", type, name, w, h];
         }
     }
     
@@ -920,7 +924,7 @@
 //经过裁剪的非头像图片
 +(NSURL *)returnClipThumbImageURLwithName:(NSString *)name Width:(NSInteger)w Height:(NSInteger)h
 {
-    NSString * string = [NSString stringWithFormat:@"%@%@@%dw_%dh_1l_1e_1c.src", THUMBIMAGEURL, name, w, h];
+    NSString * string = [NSString stringWithFormat:@"%@%@@%ldw_%ldh_1l_1e_1c.src", THUMBIMAGEURL, name, w, h];
     return [NSURL URLWithString:string];
 }
 
@@ -936,4 +940,83 @@
 {
     return [self returnThumbImageURLwithType:THUMBPETTXURL Name:name Width:w Height:h];
 }
+
+#pragma mark -
++(void)setOriginY:(CGFloat)originY WithView:(UIView *)view
+{
+    CGRect rect = view.frame;
+    rect.origin.y = originY;
+    view.frame = rect;
+}
++(void)setOriginX:(CGFloat)originX WithView:(UIView *)view
+{
+    CGRect rect = view.frame;
+    rect.origin.x = originX;
+    view.frame = rect;
+}
+
++(void)setWidth:(CGFloat)width WithView:(UIView *)view
+{
+    CGRect rect = view.frame;
+    rect.size.width = width;
+    view.frame = rect;
+}
+
++(void)setHeight:(CGFloat)height WithView:(UIView *)view
+{
+    CGRect rect = view.frame;
+    rect.size.height = height;
+    view.frame = rect;
+}
++(CGFloat)returnOriginAndHeightWithView:(UIView *)view
+{
+    return view.frame.origin.y+view.frame.size.height;
+}
++(CGFloat)returnOriginAndWidthWithView:(UIView *)view
+{
+    return view.frame.origin.x+view.frame.size.width;
+}
+//
++(void)setVerticalSpace:(CGFloat)space FromView:(UIView *)fromView ToView:(UIView *)toView
+{
+    [self setOriginY:[self returnOriginAndHeightWithView:toView]+space WithView:fromView];
+}
++(void)setHorizonSpace:(CGFloat)space FromView:(UIView *)fromView ToView:(UIView *)toView
+{
+    [self setOriginX:[self returnOriginAndWidthWithView:toView] WithView:fromView];
+}
+
+#pragma mark - 判断注册
++(BOOL)isShouldRegist:(UIViewController *)controller
+{
+    if (![[USER objectForKey:@"isSuccess"] intValue]) {
+        VariousAlertViewController * vc = [[VariousAlertViewController alloc] init];
+        __unsafe_unretained VariousAlertViewController *weakVarious = vc;
+        __block UIViewController *blockSelf = controller;
+        vc.regClick = ^(){
+            ChooseInViewController * choose = [[ChooseInViewController alloc] init];
+            [blockSelf presentViewController:choose  animated:YES completion:nil];
+            [weakVarious.view removeFromSuperview];
+            [choose autorelease];
+        };
+        vc.fastClick = ^(){
+            LoginViewController * login = [[LoginViewController alloc] init];
+            [blockSelf presentViewController:login animated:YES completion:nil];
+            [weakVarious.view removeFromSuperview];
+            [login autorelease];
+        };
+        [controller.view addSubview:vc.view];
+        [vc autorelease];
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
++(CGSize)returnSizeAboutString:(NSString *)str FontSize:(CGFloat)font DefaultSize:(CGSize)defaultSize
+{
+    CGSize size = [str boundingRectWithSize:defaultSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:font]} context:nil].size;
+    return size;
+}
+
 @end

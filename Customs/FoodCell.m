@@ -50,7 +50,10 @@
     //从下往上搭
     //描述
     //    NSLog(@"%f--%f--%f", size.width, size.height, whiteView.frame.size.width-30);
-    desLabel = [MyControl createLabelWithFrame:CGRectZero Font:14 Text:nil];
+    desLabel = [[HMEmotionTextView alloc] init];
+    desLabel.userInteractionEnabled = NO;
+    desLabel.textContainerInset = UIEdgeInsetsZero;
+//    [MyControl createLabelWithFrame:CGRectZero Font:14 Text:nil];
     desLabel.textColor = [ControllerManager colorWithHexString:@"777777"];
     [whiteView addSubview:desLabel];
     
@@ -120,6 +123,9 @@
     //
     desLabel.text = model.cmt;
     CGSize size = [model.cmt sizeWithFont:[UIFont systemFontOfSize:14] constrainedToSize:CGSizeMake(whiteView.frame.size.width-30, 100) lineBreakMode:1];
+    desLabel.attributedText = [ControllerManager changToAttributedText:model.cmt];
+    desLabel.font = [UIFont systemFontOfSize:14];
+    desLabel.textColor = [ControllerManager colorWithHexString:@"777777"];
     desLabel.frame = CGRectMake(15, whiteView.frame.size.height-size.height-30, whiteView.frame.size.width-30, size.height);
     //
     line.frame = CGRectMake(5, desLabel.frame.origin.y-10, whiteView.frame.size.width-10, 1);

@@ -16,7 +16,7 @@
     UITextField * tf;
     UIButton * cancelBtn;
     
-    int didSelected;
+    NSInteger didSelected;
 }
 @property(nonatomic,retain)NSString * tfString;
 @property(nonatomic,retain)NSMutableArray * dataArray;

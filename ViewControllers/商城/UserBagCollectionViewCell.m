@@ -67,14 +67,15 @@
     
     self.presentNumberLabel.text = [NSString stringWithFormat:@"X %@", num];
     //
-    NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:itemId];
-    self.titleLabel.text = [dict objectForKey:@"name"];
-    if ([[dict objectForKey:@"add_rq"] rangeOfString:@"-"].location == NSNotFound) {
-        self.popNumberLabel.text = [NSString stringWithFormat:@"+%@", [dict objectForKey:@"add_rq"]];
+    GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:itemId];
+    self.titleLabel.text = model.name;
+    if ([model.add_rq rangeOfString:@"-"].location == NSNotFound) {
+        self.popNumberLabel.text = [NSString stringWithFormat:@"+%@", model.add_rq];
     }else{
-        self.popNumberLabel.text = [dict objectForKey:@"add_rq"];
+        self.popNumberLabel.text = model.add_rq;
     }
-    self.presentImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", itemId]];
+    [self.presentImageView setImageWithURL:[NSURL URLWithString:model.detail_image]];
+//    self.presentImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", itemId]];
 }
 /*
 // Only override drawRect: if you perform custom drawing.

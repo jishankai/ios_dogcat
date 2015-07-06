@@ -32,7 +32,7 @@
     [self addSubview:line];
     
 }
--(void)configUI:(UserPetListModel *)model Index:(int)index BtnSelected:(BOOL)select
+-(void)configUI:(UserPetListModel *)model Index:(NSInteger)index BtnSelected:(BOOL)select
 {
     
     

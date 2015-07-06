@@ -206,7 +206,7 @@
     cell.clipsToBounds = YES;
     return cell;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     //105  165
     NSDate * date = [NSDate date];
@@ -222,7 +222,7 @@
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    int a = indexPath.row;
+    NSInteger a = indexPath.row;
 //    NSLog(@"%d", a);
     BegFoodListModel *model = self.dataArray[a];
     FrontImageDetailViewController * vc = [[FrontImageDetailViewController alloc] init];

@@ -178,7 +178,7 @@
     
     [self.view bringSubviewToFront:navView];
     
-    int index = self.goodsArray.count;
+    NSInteger index = self.goodsArray.count;
     if (index%2) {
         sv.contentSize = CGSizeMake(self.view.frame.size.width, 15+(index/2+1)*160);
     }else{
@@ -283,10 +283,11 @@
         }else{
             hang_tag.image = [UIImage imageNamed:@"giftAlert_goodBg.png"];
         }
-        giftImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", self.goodsArray[i]]];
-        NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:self.goodsArray[i]];
-        productLabel.text = [dict objectForKey:@"name"];
-        rqz.text = [dict objectForKey:@"add_rq"];
+        
+        GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:self.goodsArray[i]];
+        [giftImageView setImageWithURL:[NSURL URLWithString:model.detail_image]];
+        productLabel.text = model.name;
+        rqz.text = model.add_rq;
         
         /*******************i+1*********************/
         if (i+1 == self.goodsArray.count) {
@@ -305,10 +306,10 @@
         }else{
             hang_tag2.image = [UIImage imageNamed:@"giftAlert_goodBg.png"];
         }
-        giftImageView2.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", self.goodsArray[i+1]]];
-        NSDictionary * dict2 = [ControllerManager returnGiftDictWithItemId:self.goodsArray[i+1]];
-        productLabel2.text = [dict2 objectForKey:@"name"];
-        rqz2.text = [dict2 objectForKey:@"add_rq"];
+        GiftsModel *model2 = [ControllerManager returnGiftsModelWithGiftId:self.goodsArray[i+1]];
+        [giftImageView2 setImageWithURL:[NSURL URLWithString:model2.detail_image]];
+        productLabel2.text = model2.name;
+        rqz2.text = model2.add_rq;
     }
     
 }

@@ -71,40 +71,48 @@
     bigImage = [MyControl createImageViewWithFrame:CGRectMake(8, 10, lab1.frame.origin.x-20, 160) ImageName:@""];
     bigImage.contentMode = UIViewContentModeScaleAspectFit;
     
-    NSURL *url = [MyControl returnThumbImageURLwithName:[self.dict objectForKey:@"url"] Width:bigImage.frame.size.width*2 Height:bigImage.frame.size.height*2];
-    [bigImage setImageWithURL:url placeholderImage:[UIImage imageNamed:@"water_white.png"]];
+    if (self.isFromMasselection) {
+        bigImage.image = self.oriImage;
+    }else{
+        NSURL *url = [MyControl returnThumbImageURLwithName:[self.dict objectForKey:@"url"] Width:bigImage.frame.size.width*2 Height:bigImage.frame.size.height*2];
+        [bigImage setImageWithURL:url placeholderImage:[UIImage imageNamed:@"water_white.png"]];
+    }
+    
     
     [bgView addSubview:bigImage];
     
-    //
-    UIView * bgView1 = [MyControl createViewWithFrame:CGRectZero];
-    [bgView addSubview:bgView1];
+    if(!self.isFromMasselection){
+        //
+        UIView * bgView1 = [MyControl createViewWithFrame:CGRectZero];
+        [bgView addSubview:bgView1];
+        
+        
+        UIImageView * foodImage = [MyControl createImageViewWithFrame:CGRectMake(0, 0, 32, 32) ImageName:@"exchange_orangeFood.png"];
+        [bgView1 addSubview:foodImage];
+        
+        //    bgView.frame.size.height-214/2
+        NSString * str1 = [self.dict objectForKey:@"food"];
+        CGSize size1 = [str1 sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(100, 32) lineBreakMode:1];
+        UILabel * foodNum = [MyControl createLabelWithFrame:CGRectMake(foodImage.frame.origin.x+foodImage.frame.size.width+5, 0, size1.width, 32) Font:17 Text:[self.dict objectForKey:@"food"]];
+        foodNum.textColor = ORANGE;
+        [bgView1 addSubview:foodNum];
+        
+        UIImageView * clock = [MyControl createImageViewWithFrame:CGRectMake(foodNum.frame.origin.x+foodNum.frame.size.width+20, 5, 22, 22) ImageName:@"clock.png"];
+        [bgView1 addSubview:clock];
+        
+        NSString * str2 = [NSString stringWithFormat:@"%@", [MyControl leftTimeFromStamp:[self.dict objectForKey:@"create_time"]]];
+        CGSize size2 = [str2 sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(200, 32) lineBreakMode:1];
+        deadLine = [MyControl createLabelWithFrame:CGRectMake(clock.frame.origin.x+clock.frame.size.width+5, 0, size2.width, 32) Font:17 Text:str2];
+        deadLine.textColor = ORANGE;
+        
+        [self time];
+        timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(time) userInfo:nil repeats:YES];
+        [bgView1 addSubview:deadLine];
+        
+        float w = 32+5+size1.width+size2.width+clock.frame.size.width+25;
+        bgView1.frame = CGRectMake((bgView.frame.size.width-w)/2.0, bgView.frame.size.height-234/2.0, w, 32);
+    }
     
-    
-    UIImageView * foodImage = [MyControl createImageViewWithFrame:CGRectMake(0, 0, 32, 32) ImageName:@"exchange_orangeFood.png"];
-    [bgView1 addSubview:foodImage];
-    
-//    bgView.frame.size.height-214/2
-    NSString * str1 = [self.dict objectForKey:@"food"];
-    CGSize size1 = [str1 sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(100, 32) lineBreakMode:1];
-    UILabel * foodNum = [MyControl createLabelWithFrame:CGRectMake(foodImage.frame.origin.x+foodImage.frame.size.width+5, 0, size1.width, 32) Font:17 Text:[self.dict objectForKey:@"food"]];
-    foodNum.textColor = ORANGE;
-    [bgView1 addSubview:foodNum];
-    
-    UIImageView * clock = [MyControl createImageViewWithFrame:CGRectMake(foodNum.frame.origin.x+foodNum.frame.size.width+20, 5, 22, 22) ImageName:@"clock.png"];
-    [bgView1 addSubview:clock];
-    
-    NSString * str2 = [NSString stringWithFormat:@"%@", [MyControl leftTimeFromStamp:[self.dict objectForKey:@"create_time"]]];
-    CGSize size2 = [str2 sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(200, 32) lineBreakMode:1];
-    deadLine = [MyControl createLabelWithFrame:CGRectMake(clock.frame.origin.x+clock.frame.size.width+5, 0, size2.width, 32) Font:17 Text:str2];
-    deadLine.textColor = ORANGE;
-    
-    [self time];
-    timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(time) userInfo:nil repeats:YES];
-    [bgView1 addSubview:deadLine];
-    
-    float w = 32+5+size1.width+size2.width+clock.frame.size.width+25;
-    bgView1.frame = CGRectMake((bgView.frame.size.width-w)/2.0, bgView.frame.size.height-234/2.0, w, 32);
     
 //    float width = bgView.frame.size.width-label1.frame.origin.x-20;
 //    NSString * str2 = @"今天也很努力地为自己挣口粮呢，分享给小伙伴，助TA一臂之力吧！";
@@ -119,13 +127,16 @@
         UIButton * button = [MyControl createButtonWithFrame:CGRectMake(50+(46+spe)*i, bgView.frame.size.height-70, 46, 46) ImageName:array[i] Target:self Action:@selector(shareClick:) Title:nil];
         button.tag = 1000+i;
         [bgView addSubview:button];
+        
+        if (self.isFromMasselection) {
+            [MyControl setOriginY:bgView.frame.size.height-70-20 WithView:button];
+        }
     }
     
-    
-//
-//    UILabel * label3 = [MyControl createLabelWithFrame:CGRectMake(12, bgView.frame.size.height-30, bgView.frame.size.width-12, 15) Font:10 Text:@"每人每天都有免费赏粮机会快喊小伙伴一起打赏吧~"];
-//    label3.textColor = ORANGE;
-//    [bgView addSubview:label3];
+    if (self.isFromMasselection) {
+        lab1.text = @"不在应用，也能投票";
+        lab2.text = @"每天都有免费投票的机会哦~";
+    }
 }
 -(void)time
 {
@@ -143,22 +154,42 @@
 //    return;
 //    int a = sender.tag-1000;
     //截图
-//    UIImage * image = [MyControl imageWithView:bgView];
+    UIImage * image = nil;
+    if(self.isFromMasselection){
+        image = self.oriImage;
+    }else{
+        image = bigImage.image;
+    }
+    
     
     /**************/
     if(sender.tag == 1000){
         NSLog(@"微信");
         //强制分享图片
         [UMSocialData defaultData].extConfig.wxMessageType = UMSocialWXMessageTypeWeb;
-        [UMSocialData defaultData].extConfig.wechatSessionData.url = [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, [self.dict objectForKey:@"img_id"]];
-        [UMSocialData defaultData].extConfig.wechatSessionData.title = @"轻轻一点，免费赏粮！我的口粮全靠你啦~";
-        NSString * str = nil;
-        if ([[self.dict objectForKey:@"cmt"] length]) {
-            str = [self.dict objectForKey:@"cmt"];
+        
+        NSString *title = nil;
+        if (self.isFromMasselection) {
+            [UMSocialData defaultData].extConfig.wechatSessionData.url = [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, self.img_id];
+            title = [NSString stringWithFormat:@"我是%@，快来给我投票啦~", self.name];
         }else{
-            str = @"看在我这么努力卖萌的份上快来宠宠我！免费送我点口粮好不好？";
+            [UMSocialData defaultData].extConfig.wechatSessionData.url = [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, [self.dict objectForKey:@"img_id"]];
+            title = @"轻轻一点，免费赏粮！我的口粮全靠你啦~";
         }
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:str image:bigImage.image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+        
+        [UMSocialData defaultData].extConfig.wechatSessionData.title = title;
+        NSString * str = nil;
+        if (self.isFromMasselection) {
+            str = [NSString stringWithFormat:@"我家大萌星%@参加了%@活动，投票走起~", self.name, self.massName];
+        }else{
+            if ([[self.dict objectForKey:@"cmt"] length]) {
+                str = [self.dict objectForKey:@"cmt"];
+            }else{
+                str = @"看在我这么努力卖萌的份上快来宠宠我！免费送我点口粮好不好？";
+            }
+        }
+        
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:str image:image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
@@ -173,15 +204,32 @@
         NSLog(@"朋友圈");
         //强制分享图片
         [UMSocialData defaultData].extConfig.wxMessageType = UMSocialWXMessageTypeWeb;
-        [UMSocialData defaultData].extConfig.wechatTimelineData.url = [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, [self.dict objectForKey:@"img_id"]];
-        [UMSocialData defaultData].extConfig.wechatTimelineData.title = @"轻轻一点，免费赏粮！我的口粮全靠你啦~";
-        NSString * str = nil;
-        if ([[self.dict objectForKey:@"cmt"] length]) {
-            str = [self.dict objectForKey:@"cmt"];
+        
+        NSString *title = nil;
+        if (self.isFromMasselection) {
+            [UMSocialData defaultData].extConfig.wechatTimelineData.url = [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, self.img_id];
+            title = [NSString stringWithFormat:@"我是%@，快来给我投票啦~", self.name];
         }else{
-            str = @"看在我这么努力卖萌的份上快来宠宠我！免费送我点口粮好不好？";
+            [UMSocialData defaultData].extConfig.wechatTimelineData.url = [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, [self.dict objectForKey:@"img_id"]];
+            title = @"轻轻一点，免费赏粮！我的口粮全靠你啦~";
         }
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:str image:bigImage.image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+        
+        
+        NSString * str = nil;
+        if (self.isFromMasselection) {
+            str = [NSString stringWithFormat:@"我家大萌星%@参加了%@活动，投票走起~", self.name, self.massName];
+            [UMSocialData defaultData].extConfig.wechatTimelineData.title = str;
+        }else{
+            if ([[self.dict objectForKey:@"cmt"] length]) {
+                str = [self.dict objectForKey:@"cmt"];
+            }else{
+                str = @"看在我这么努力卖萌的份上快来宠宠我！免费送我点口粮好不好？";
+            }
+            [UMSocialData defaultData].extConfig.wechatTimelineData.title = str;
+        }
+        
+        
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:str image:image location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
                 [self shareSuccess];
@@ -209,12 +257,20 @@
     }else if(sender.tag == 1002){
         NSLog(@"微博");
         NSString * string = nil;
-        if ([[self.dict objectForKey:@"cmt"] length]) {
-            string = [self.dict objectForKey:@"cmt"];
+        NSString * str = nil;
+        if (self.isFromMasselection) {
+            string = [NSString stringWithFormat:@"我家大萌星%@参加了#%@#活动，投票走起~", self.name, self.massName];
+            
+            str = [NSString stringWithFormat:@"%@%@ #我是大萌星#", string, [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, self.img_id]];
         }else{
-            string = @"看在我这么努力卖萌的份上快来宠宠我！免费送我点口粮好不好？";
+            if ([[self.dict objectForKey:@"cmt"] length]) {
+                string = [self.dict objectForKey:@"cmt"];
+            }else{
+                string = @"看在我这么努力卖萌的份上快来宠宠我！免费送我点口粮好不好？";
+            }
+            
+            str = [NSString stringWithFormat:@"%@#挣口粮#%@ #我是大萌星#", string, [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, [self.dict objectForKey:@"img_id"]]];
         }
-        NSString * str = [NSString stringWithFormat:@"%@#挣口粮#%@（分享自@宠物星球社交应用）", string, [NSString stringWithFormat:@"%@%@", WEBBEGFOODAPI, [self.dict objectForKey:@"img_id"]]];
         
         //
         BOOL oauth = [UMSocialAccountManager isOauthAndTokenNotExpired:UMShareToSina];

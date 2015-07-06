@@ -28,7 +28,7 @@
 
 @property(nonatomic,copy)NSString * giftName;
 
-@property(nonatomic,copy)void (^unShakeNum)(int);
+@property(nonatomic,copy)void (^unShakeNum)(NSInteger);
 
 @property(nonatomic,copy)void (^updateContri)(NSString *);
 @property(nonatomic)BOOL isFromStar;

@@ -142,7 +142,7 @@
         [cell configUI:self.dataArray[indexPath.row] Index:indexPath.row BtnSelected:NO];
     }
     
-    cell.selectBlock = ^(int a){
+    cell.selectBlock = ^(NSInteger a){
         [self.selectArray removeAllObjects];
         [self.selectNameArray removeAllObjects];
         
@@ -159,12 +159,14 @@
     cell.backgroundColor = [UIColor clearColor];
     return cell;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 70.0f;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSLog(@"选择了第%ld个", indexPath.row);
+
     [self.selectArray removeAllObjects];
     [self.selectNameArray removeAllObjects];
     

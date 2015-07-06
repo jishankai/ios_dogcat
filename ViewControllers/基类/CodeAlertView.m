@@ -118,7 +118,7 @@
         [self.bgImageView addSubview:tf];
         
         lab1.text = @"填写邀请码，成为TA的粉丝，获得邀请奖励";
-        lab2.text = @"没有邀请码？向宠物星球的小伙伴索要吧";
+        lab2.text = @"没有邀请码？向我是大萌星的小伙伴索要吧";
         
         lab1.frame = CGRectMake(10, 90, self.bgImageView.frame.size.width-20, 40);
         lab1.numberOfLines = 0;
@@ -239,7 +239,7 @@
     //截图
 //    UIImage * image = [MyControl imageWithView:self.bgImageView];
     
-    self.shareClick(button.tag-100, self.headImage.image, self.model.invite_code);
+    self.shareClick((int)button.tag-100, self.headImage.image, self.model.invite_code);
     
 }
 -(void)closeBtnClick

@@ -38,8 +38,13 @@
     foodNum.textColor = ORANGE;
     [self addSubview:foodNum];
     
-    desLabel = [MyControl createLabelWithFrame:CGRectMake(originX, headImage.frame.origin.y+15, [UIScreen mainScreen].bounds.size.width-originX-15, headImage.frame.size.height-15) Font:12 Text:nil];
+    desLabel = [[HMEmotionTextView alloc] initWithFrame:CGRectMake(originX-5, headImage.frame.origin.y+25, [UIScreen mainScreen].bounds.size.width-originX-15, headImage.frame.size.height-30)];
+//    [MyControl createLabelWithFrame:CGRectMake(originX, headImage.frame.origin.y+15, [UIScreen mainScreen].bounds.size.width-originX-15, headImage.frame.size.height-15) Font:12 Text:nil];
+//    desLabel.textAlignment = NSTextAlignmentCenter;
+    desLabel.userInteractionEnabled = NO;
+    desLabel.textContainerInset = UIEdgeInsetsZero;
     desLabel.textColor = [UIColor blackColor];
+//    desLabel.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.5];
     [self addSubview:desLabel];
     
     timeLabel = [MyControl createLabelWithFrame:CGRectMake(width-15-100, 10+headImage.frame.size.height-10, 100, 15) Font:11 Text:nil];
@@ -166,7 +171,7 @@
     } completion:^(BOOL finished) {
         selectView.hidden = YES;
     }];
-    NSLog(@"%d", btn.tag);
+    NSLog(@"%ld", btn.tag);
     for (int i=0; i<4; i++) {
         UILabel * label = (UILabel *)[self viewWithTag:200+i];
         label.backgroundColor = [UIColor clearColor];
@@ -205,7 +210,10 @@
     NSURL *url = [MyControl returnThumbImageURLwithName:model.url Width:headImage.frame.size.width*2 Height:headImage.frame.size.height*2];
     [headImage setImageWithURL:url placeholderImage:[UIImage imageNamed:@"defaultPetPic.jpg"]];
     
-    desLabel.text = model.cmt;
+//    desLabel.text = model.cmt;
+    desLabel.attributedText = [ControllerManager changToAttributedText:model.cmt];
+    desLabel.font = [UIFont systemFontOfSize:12];
+    
     timeLabel.text = [MyControl timeFromTimeStamp:model.create_time];
     foodNum.text = [NSString stringWithFormat:@"已挣得口粮：%@ 份", model.food];
     

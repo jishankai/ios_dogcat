@@ -91,8 +91,8 @@
 - (void)loadData
 {
     LOADING;
-    NSString *rankSig = [MyMD5 md5:[NSString stringWithFormat:@"category=%ddog&cat",self.category]];
-    NSString *rank = [NSString stringWithFormat:@"%@%d&sig=%@&SID=%@",POPULARRANKAPI,self.category,rankSig,[ControllerManager getSID]];
+    NSString *rankSig = [MyMD5 md5:[NSString stringWithFormat:@"category=%lddog&cat",self.category]];
+    NSString *rank = [NSString stringWithFormat:@"%@%ld&sig=%@&SID=%@",POPULARRANKAPI,self.category,rankSig,[ControllerManager getSID]];
     NSLog(@"rank:%@",rank);
     
     __block PopularityListViewController * blockSelf = self;
@@ -109,7 +109,7 @@
                 return;
             }
             NSArray *array = [load.dataDict objectForKey:@"data"];
-            NSLog(@"%d", array.count);
+            NSLog(@"%ld", array.count);
             for (int i = 0; i<array.count; i++) {
                 NSDictionary *dict = array[i];
                 popularityListModel *model = [[popularityListModel alloc] init];
@@ -301,6 +301,8 @@
     tv.backgroundColor = [UIColor clearColor];
     [self.view addSubview:tv];
     [tv release];
+    
+    [tv registerNib:[UINib nibWithNibName:@"PopularityCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"PopularityCell"];
 }
 #pragma mark - 创建arrow
 -(void)createArrow
@@ -337,11 +339,11 @@
     PopularityCell * cell = [tableView dequeueReusableCellWithIdentifier:cellID];
     
     popularityListModel *model = [self.limitRankDataArray objectAtIndex:indexPath.row];
-    [cell configUIWithName:model.name rq:model.t_rq rank:indexPath.row+1 upOrDown:indexPath.row%2 shouldLarge:NO];
+    [cell configUIWithName:model.name rq:model.t_rq rank:(int)indexPath.row+1 upOrDown:indexPath.row%2 shouldLarge:NO];
     
     __block PopularityListViewController * blockSelf = self;
-    cell.cellClick = ^(int num){
-        NSLog(@"跳转到第%d个国家", num);
+    cell.cellClick = ^(NSInteger num){
+        NSLog(@"跳转到第%ld个国家", num);
         PetMainViewController *petInfoVC = [[PetMainViewController alloc] init];
         petInfoVC.aid = model.aid;
         [blockSelf presentViewController:petInfoVC animated:YES completion:nil];
@@ -361,10 +363,10 @@
     
 //    tableView == tv && markLineNum == indexPath.row && isShow == NO
     if (indexPath.row == myCurrentCountNum-1) {
-        [cell configUIWithName:model.name rq:model.t_rq rank:indexPath.row+1 upOrDown:model.vary shouldLarge:YES];
+        [cell configUIWithName:model.name rq:model.t_rq rank:(int)indexPath.row+1 upOrDown:model.vary shouldLarge:YES];
         cell.backgroundColor = [ControllerManager colorWithHexString:@"f9f9f9"];
     }else{
-        [cell configUIWithName:model.name rq:model.t_rq rank:indexPath.row+1 upOrDown:model.vary shouldLarge:NO];
+        [cell configUIWithName:model.name rq:model.t_rq rank:(int)indexPath.row+1 upOrDown:model.vary shouldLarge:NO];
     }
 
     [MyControl setImageForImageView:cell.headImageView Tx:model.tx isPet:YES isRound:YES];
@@ -382,7 +384,7 @@
     }
     return cell;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 50.0f;
 }

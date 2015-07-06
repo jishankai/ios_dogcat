@@ -17,17 +17,20 @@
 #import "MenuModel.h"
 
 @interface FoodViewController ()
-
+{
+    UIImageView *guide;
+}
 @end
 
 @implementation FoodViewController
 
-//-(void)viewWillAppear:(BOOL)animated
-//{
-//    if (!isLoaded) {
-//        [self createGuide];
-//    }
-//}
+-(void)viewWillAppear:(BOOL)animated
+{
+    if (![[USER objectForKey:@"guide_food"] intValue]) {
+        [self createGuide];
+        [USER setObject:@"1" forKey:@"guide_food"];
+    }
+}
 -(void)viewDidAppear:(BOOL)animated
 {
 //    isLoaded = YES;
@@ -41,7 +44,30 @@
         [nc release];
     }
 }
+-(void)createGuide
+{
+    guide = [MyControl createImageViewWithFrame:[UIScreen mainScreen].bounds ImageName:@"guide2.png"];
+    if(self.view.frame.size.height <= 480){
+        [MyControl setHeight:568 WithView:guide];
+    }
+    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+    [guide addGestureRecognizer:tap];
+    
+    FirstTabBarViewController * tabBar = (FirstTabBarViewController *)[[UIApplication sharedApplication].delegate window].rootViewController;
+    [tabBar.view addSubview:guide];
+    [tap release];
+}
+-(void)tap:(UITapGestureRecognizer *)tap
+{
+    [UIView animateWithDuration:0.2 animations:^{
+        guide.alpha = 0;
+    }completion:^(BOOL finished) {
+        guide.hidden = YES;
+        [guide removeFromSuperview];
+    }];
+}
 
+#pragma mark -
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
@@ -348,7 +374,7 @@
     return cell;
 }
 
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return self.view.frame.size.width;
 }
@@ -419,7 +445,7 @@
     } completion:^(BOOL finished) {
         selectView.hidden = YES;
     }];
-    NSLog(@"%d", btn.tag);
+    NSLog(@"%ld", btn.tag);
     for (int i=0; i<4; i++) {
         UILabel * label = (UILabel *)[self.view viewWithTag:200+i];
         label.backgroundColor = [UIColor clearColor];

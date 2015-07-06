@@ -31,8 +31,8 @@
 @property(nonatomic,copy)NSString * aid;
 
 @property(nonatomic,retain)UIButton * pBtn;
-@property(nonatomic,copy)void (^pBtnClick)(int,NSString *);
-@property(nonatomic,copy)void (^imageClick)(int);
+@property(nonatomic,copy)void (^pBtnClick)(NSInteger,NSString *);
+@property(nonatomic,copy)void (^imageClick)(NSInteger);
 @property(nonatomic,copy)void (^jumpPetClick)(NSString *);
 @property(nonatomic,copy)void (^jumpUserClick)();
 

@@ -57,7 +57,7 @@
 /**
  *  表情的附加页面
  */
-@property (strong, nonatomic) UIView *faceView;
+//@property (strong, nonatomic) UIView *faceView;
 
 /**
  *  录音的附加页面

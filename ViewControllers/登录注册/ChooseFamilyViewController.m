@@ -425,11 +425,11 @@
     [headerBgView addSubview:whiteLine];
     return headerBgView;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 125.0f;
 }
--(float)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
     return 70.0f;
 }
@@ -444,7 +444,7 @@
 
 -(void)showOrHideBtnClick:(UIButton *)button
 {
-    NSLog(@"%d", button.tag);
+    NSLog(@"%ld", button.tag);
     if (didSelected == button.tag-100) {
         didSelected = -1;
         [tv reloadData];
@@ -456,7 +456,7 @@
     
 //    [tv scrollToNearestSelectedRowAtScrollPosition:UITableViewScrollPositionTop animated:YES];
 }
--(void)loadCardDataWithTag:(int)Tag
+-(void)loadCardDataWithTag:(NSInteger)Tag
 {
     NSDictionary * dic = [self.detailDict objectForKey:[self.limitDataArray[didSelected] aid]];
     if (dic) {
@@ -480,7 +480,7 @@
 }
 -(void)joinClick:(UIButton *)button
 {
-    NSLog(@"join-%d", button.tag-200);
+    NSLog(@"join-%ld", button.tag-200);
     
 //    [MMProgressHUD setPresentationStyle:MMProgressHUDPresentationStyleShrink];
     
@@ -587,7 +587,7 @@
 }
 -(void)headBtnClick
 {
-    NSLog(@"click row:%d", didSelected);
+    NSLog(@"click row:%ld", didSelected);
 }
 
 
@@ -921,15 +921,15 @@
 //上拉加载的时候调用
 -(void)loadMoreRecommandDataWithType:(NSString *)type
 {
-    NSLog(@"---%d", pageNum);
+    NSLog(@"---%ld", pageNum);
     NSString * sig = nil;
     NSString * url = nil;
 //    if ([self.limitTypeName isEqualToString:@"所有种族"]) {
 //        sig = [MyMD5 md5:[NSString stringWithFormat:@"page=%ddog&cat", pageNum]];
 //        url = [NSString stringWithFormat:@"%@%d&sig=%@&SID=%@", RECOMMANDCOUNTRYLISTAPI3, pageNum, sig, [ControllerManager getSID]];
 //    }else{
-        sig = [MyMD5 md5:[NSString stringWithFormat:@"from=%@&page=%ddog&cat", type, pageNum]];
-        url = [NSString stringWithFormat:@"%@%@&page=%d&sig=%@&SID=%@", RECOMMANDCOUNTRYLISTAPI3, type, pageNum, sig, [ControllerManager getSID]];
+        sig = [MyMD5 md5:[NSString stringWithFormat:@"from=%@&page=%lddog&cat", type, pageNum]];
+        url = [NSString stringWithFormat:@"%@%@&page=%ld&sig=%@&SID=%@", RECOMMANDCOUNTRYLISTAPI3, type, pageNum, sig, [ControllerManager getSID]];
 //    }
     //
     LOADING;
@@ -962,15 +962,15 @@
 }
 -(void)loadMoreTopicDataType:(NSString *)type
 {
-    NSLog(@"---%d", pageNum);
+    NSLog(@"---%ld", pageNum);
     NSString * sig = nil;
     NSString * url = nil;
 //    if ([self.limitTypeName isEqualToString:@"所有种族"]) {
 //        sig = [MyMD5 md5:[NSString stringWithFormat:@"aid=%ddog&cat", pageNum]];
 //        url = [NSString stringWithFormat:@"%@%d&sig=%@&SID=%@", TOPICCOUNTRYLISTAPI3, pageNum, sig, [ControllerManager getSID]];
 //    }else{
-        sig = [MyMD5 md5:[NSString stringWithFormat:@"from=%@&page=%ddog&cat", type, pageNum]];
-        url = [NSString stringWithFormat:@"%@%@&page=%d&sig=%@&SID=%@", TOPICCOUNTRYLISTAPI3, type, pageNum, sig, [ControllerManager getSID]];
+        sig = [MyMD5 md5:[NSString stringWithFormat:@"from=%@&page=%lddog&cat", type, pageNum]];
+        url = [NSString stringWithFormat:@"%@%@&page=%ld&sig=%@&SID=%@", TOPICCOUNTRYLISTAPI3, type, pageNum, sig, [ControllerManager getSID]];
 //    }
     //
     LOADING;

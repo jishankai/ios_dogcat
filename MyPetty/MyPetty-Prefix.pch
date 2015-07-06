@@ -47,16 +47,29 @@
 #import "UserCardViewController.h"
 #import "PetMainViewController.h"
 #import "ChargeViewController.h"
+#import "GiftsModel.h"
+//
+#import "FaceKeyboard.h"
+#import "HMEmotionTextView.h"
 
+#define LOADING [ControllerManager createLoading]
+//LoadingView * loadView = [ControllerManager shareLoading];[[UIApplication sharedApplication].keyWindow addSubview:loadView];
+#define LOADING2 [ControllerManager createLoading]
+//LoadingView * loadView = [ControllerManager shareLoading];[self.view addSubview:loadView];
 
-#define LOADING LoadingView * loadView = [ControllerManager shareLoading];[[UIApplication sharedApplication].keyWindow addSubview:loadView];
-#define LOADING2 LoadingView * loadView = [ControllerManager shareLoading];[self.view addSubview:loadView];
+#define ENDLOADING [ControllerManager removecatLoading]
+//LoadingView * loadView = [ControllerManager shareLoading];[loadView stopAnimation];
 
-#define ENDLOADING LoadingView * loadView = [ControllerManager shareLoading];[loadView stopAnimation];
+#define LOADFAILED [ControllerManager removecatLoading];[MyControl popAlertWithView:[UIApplication sharedApplication].keyWindow Msg:@"网络异常"]
 
-#define LOADFAILED LoadingView * load = [ControllerManager shareLoading];[load stopAnimation];[MyControl popAlertWithView:[UIApplication sharedApplication].keyWindow Msg:@"网络异常"];
-
+#define kDataLoadFailed [ControllerManager removecatLoading];[MyControl popAlertWithView:[UIApplication sharedApplication].keyWindow Msg:@"数据异常"]
+//LoadingView * load = [ControllerManager shareLoading];[load stopAnimation];
+//已知需要注册时调用 mrc
 #define ShowAlertView VariousAlertViewController * vc = [[VariousAlertViewController alloc] init];vc.regClick = ^(){ChooseInViewController * choose = [[ChooseInViewController alloc] init];[self presentViewController:choose  animated:YES completion:nil];[choose release];[vc.view removeFromSuperview];};vc.fastClick = ^(){LoginViewController * login = [[LoginViewController alloc] init];[self presentViewController:login animated:YES completion:nil];[login release];[vc.view removeFromSuperview];};[self.view addSubview:vc.view];[vc release];
+//判断是否注册，包括注册弹窗
+#define ShouldShowRegist FirstTabBarViewController *first = (FirstTabBarViewController *)[[UIApplication sharedApplication].delegate window].rootViewController;if ([MyControl isShouldRegist:first]) {return;}
+
+//#define ShowAlertView_ARC VariousAlertViewController * vc = [[VariousAlertViewController alloc] init];vc.regClick = ^(){ChooseInViewController * choose = [[ChooseInViewController alloc] init];[self presentViewController:choose  animated:YES completion:nil];[vc.view removeFromSuperview];};vc.fastClick = ^(){LoginViewController * login = [[LoginViewController alloc] init];[self presentViewController:login animated:YES completion:nil];[vc.view removeFromSuperview];};[self.view addSubview:vc.view];
 
 
 #define LOADPETLIST [ControllerManager loadPetList]
@@ -99,6 +112,10 @@
 #define LoadingFailed [MMProgressHUD dismissWithError:@"网络连接异常" afterDelay:1.5];
 
 #define SHOWMENU JDSideMenu * menu = [ControllerManager shareJDSideMenu];[menu showMenuAnimated:YES];
+
+#define WIDTH [UIScreen mainScreen].bounds.size.width
+#define HEIGHT [UIScreen mainScreen].bounds.size.height
+
 
 //拉黑举报5个API
 #define REPORTUSERAPI @"http://release4pet.imengstar.com/index.php?r=user/reportApi&usr_id="
@@ -201,8 +218,46 @@
 
 //宠物头像缩略图URL
 #define THUMBPETTXURL @"http://txthumb.imengstar.com/tx_ani/"
+
+
+//充值网址URL
+#define RECHARGEURLAPI @"http://release4pet.imengstar.com/index.php?r=site/rechargeUrl"
+
+//文章API
+#define ARTICLESAPI @"http://release4pet.imengstar.com/index.php?r=social/articles"
+
+//海选API
+#define MASSELECTIONAPI @"http://release4pet.imengstar.com/index.php?r=star/listApi&sig=beac851bfcd1b0d3dc98b327aa7fbad2&SID="
+
+
+//投票列表API
+#define VOTELISTAPI @"http://release4pet.imengstar.com/index.php?r=star/newestApi&star_id="
+#define VOTELISTAPI2 @"http://release4pet.imengstar.com/index.php?r=star/newestApi&page="
+
+//投票API
+#define VOTEAPI @"http://release4pet.imengstar.com/index.php?r=star/voteApi&img_id="
+
+//活动排名API
+#define VOTERANKAPI @"http://release4pet.imengstar.com/index.php?r=star/rankApi&star_id="
+#define VOTERANKAPI2 @"http://release4pet.imengstar.com/index.php?r=star/rankApi&page="
+
+//活动贡献弹框API aid=&star_id=
+#define VOTECONTRIAPI @"http://release4pet.imengstar.com/index.php?r=star/contriApi&aid="
+
+//热门照片上下拉刷新  page star_id
+#define MASSPOPULARAPI @"http://release4pet.imengstar.com/index.php?r=star/popularApi&page="
+
+
+//礼物列表API  服务器控制  默认API里会返回code，根据code不同操作不同，决定是否进行更新 code=
+#define GIFTLISTAPI @"http://release4pet.imengstar.com/index.php?r=gift/listApi&sig=beac851bfcd1b0d3dc98b327aa7fbad2&SID="
+
+#define GIFTLISTAPI2 @"http://release4pet.imengstar.com/index.php?r=gift/listApi&code="
+
+
+
 /********************************/
 
+#pragma mark -
 //IP头API
 #define IPURL @"http://54.199.161.210/dc/index.php"
 #define IPURL2 @"http://release4pet.imengstar.com/index.php"
@@ -210,7 +265,7 @@
 //注册API
 #define REGISTERAPI @"http://release4pet.imengstar.com/index.php?r=user/registerApi&age=&code=&gender=&type=&wechat=&weibo=&sig=%@&SID=%@"
 
-//创建圈子  age gender name type
+//创建圈子、宠物  age gender name type
 #define CREATECOUNTRY @"http://release4pet.imengstar.com/index.php?r=animal/createApi"
 
 //修改宠物信息API

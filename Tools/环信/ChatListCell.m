@@ -16,10 +16,10 @@
 //#import "UIImageView+EMWebCache.h"
 
 @interface ChatListCell (){
-    UILabel *_timeLabel;
-    UILabel *_unreadLabel;
-    UILabel *_detailLabel;
-    UIView *_lineView;
+    UILabel *_timeLabel;//显示时间
+    UILabel *_unreadLabel;//显示未读
+    UILabel *_detailLabel;//显示聊天内容
+    UIView *_lineView;//消息分界线
 }
 
 @end
@@ -47,7 +47,7 @@
         _unreadLabel.clipsToBounds = YES;
         [self.contentView addSubview:_unreadLabel];
         
-        _detailLabel = [[UILabel alloc] initWithFrame:CGRectMake(65, 30, 175, 20)];
+        _detailLabel = [[UILabel alloc] initWithFrame:CGRectMake(65, 30, self.frame.size.width - 65- 30, 20)];
         _detailLabel.backgroundColor = [UIColor clearColor];
         _detailLabel.font = [UIFont systemFontOfSize:15];
         _detailLabel.textColor = [UIColor lightGrayColor];
@@ -123,8 +123,10 @@
     self.textLabel.font = [UIFont boldSystemFontOfSize:15];
     self.textLabel.textColor = [ControllerManager colorWithHexString:@"404040"];
     self.textLabel.frame = CGRectMake(65, 7, 175, 20);
-    
-    _detailLabel.text = _detailMsg;
+    //显示包含自定义表情的消息
+//    _detailLabel.text = _detailMsg;
+    _detailLabel.attributedText = [ControllerManager changToAttributedText:_detailMsg];
+
     _timeLabel.text = _time;
     if (_unreadCount > 0) {
         if (_unreadCount < 9) {
@@ -136,7 +138,7 @@
         }
         [_unreadLabel setHidden:NO];
         [self.contentView bringSubviewToFront:_unreadLabel];
-        _unreadLabel.text = [NSString stringWithFormat:@"%d",_unreadCount];
+        _unreadLabel.text = [NSString stringWithFormat:@"%ld",_unreadCount];
     }else{
         [_unreadLabel setHidden:YES];
     }

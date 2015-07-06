@@ -146,6 +146,7 @@
     self.imageLayer.mask = NULL;
     
     if (self.completion) {
+        NSLog(@"%@.....",self.userInfo);
         self.completion(self.userInfo);
     }
 }

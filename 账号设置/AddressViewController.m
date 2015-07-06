@@ -405,7 +405,7 @@
     if (component == PROVINCE_COMPONENT) {
         selectedProvince = [province objectAtIndex: row];
         //取出省
-        NSDictionary *tmp = [NSDictionary dictionaryWithDictionary: [areaDic objectForKey: [NSString stringWithFormat:@"%d", row]]];
+        NSDictionary *tmp = [NSDictionary dictionaryWithDictionary: [areaDic objectForKey: [NSString stringWithFormat:@"%ld", row]]];
         NSDictionary *dic = [NSDictionary dictionaryWithDictionary: [tmp objectForKey: selectedProvince]];
         //取出城市
         NSArray *cityArray = [dic allKeys];

@@ -11,6 +11,7 @@
 #define DEFAULT_VOID_COLOR [UIColor whiteColor]
 #import <CoreText/CoreText.h>
 
+
 @implementation ControllerManager
 
 static RandomViewController * rvc = nil;
@@ -32,6 +33,7 @@ MBProgressHUD *HUD;
 static FirstTabBarViewController * tabBar = nil;
 
 static NSInteger checkUpdate;
+static UIImageView *catLoadingImageView = nil;
 
 +(id)shareManagerRandom
 {
@@ -573,8 +575,8 @@ static NSInteger checkUpdate;
 
 +(void)loadPetList
 {
-    NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"is_simple=1&usr_id=%@dog&cat", [USER objectForKey:@"usr_id"]]];
-    NSString * url = [NSString stringWithFormat:@"%@%d&usr_id=%@&sig=%@&SID=%@", USERPETLISTAPI, 1, [USER objectForKey:@"usr_id"], sig, [ControllerManager getSID]];
+    NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"is_simple=0&usr_id=%@dog&cat", [USER objectForKey:@"usr_id"]]];
+    NSString * url = [NSString stringWithFormat:@"%@%d&usr_id=%@&sig=%@&SID=%@", USERPETLISTAPI, 0, [USER objectForKey:@"usr_id"], sig, [ControllerManager getSID]];
     NSLog(@"%@", url);
     httpDownloadBlock * request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock * load) {
         if (isFinish) {
@@ -599,18 +601,29 @@ static NSInteger checkUpdate;
 
 
 #pragma mark - 捧萌星的充值弹窗
-+(void)addAlertWith:(UIViewController *)vc Cost:(int)cost SubType:(int)subType
++(void)addAlertWith:(UIViewController *)vc Cost:(NSInteger)cost SubType:(int)subType
 {
     //充值弹窗
     Alert_2ButtonView2 * twoBtnView = [[Alert_2ButtonView2 alloc] initWithFrame:[UIScreen mainScreen].bounds];
     twoBtnView.type = 2;
     twoBtnView.subType = subType;
-    twoBtnView.rewardNum = [NSString stringWithFormat:@"%d", cost];
+    twoBtnView.rewardNum = [NSString stringWithFormat:@"%ld", cost];
     [twoBtnView makeUI];
     twoBtnView.jumpCharge = ^(){
-        ChargeViewController * charge = [[ChargeViewController alloc] init];
-        [vc presentViewController:charge animated:YES completion:nil];
-        [charge release];
+        //5.8
+        Alert_oneBtnView * oneView = [[Alert_oneBtnView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        oneView.type = 4;
+        [oneView makeUI];
+        oneView.jumpTB = ^(){
+            ChargeViewController * charge = [[ChargeViewController alloc] init];
+            [vc presentViewController:charge animated:YES completion:nil];
+            [charge release];
+        };
+        [[UIApplication sharedApplication].keyWindow addSubview:oneView];
+        [oneView release];
+//        ChargeViewController * charge = [[ChargeViewController alloc] init];
+//        [vc presentViewController:charge animated:YES completion:nil];
+//        [charge release];
     };
     [vc.view addSubview:twoBtnView];
     [twoBtnView release];
@@ -634,5 +647,169 @@ static NSInteger checkUpdate;
 +(void)setCheckUpdate
 {
     checkUpdate = 1;
+}
+
+
++(void)hideTabBar
+{
+    FirstTabBarViewController *tabBar = (FirstTabBarViewController *)[[UIApplication sharedApplication].delegate window].rootViewController;
+    [tabBar hideBottom];
+}
++(void)showTabBar
+{
+    FirstTabBarViewController *tabBar = (FirstTabBarViewController *)[[UIApplication sharedApplication].delegate window].rootViewController;
+    [tabBar showBottom];
+}
+
+
+#pragma mark - 更新礼物列表
++(void)updateGiftList
+{
+    NSString *url = nil;
+    if([[USER objectForKey:@"GiftCode"] isKindOfClass:[NSString class]] && [[USER objectForKey:@"GiftCode"] length]){
+        //有code
+        NSString *sig = [MyMD5 md5:[NSString stringWithFormat:@"code=%@dog&cat", @"e4789d5f60405c003f60250c8f843fd8"]];
+        url = [NSString stringWithFormat:@"%@%@&sig=%@&SID=%@", GIFTLISTAPI2, @"e4789d5f60405c003f60250c8f843fd8", sig, [self getSID]];
+        NSLog(@"updategift_url:%@", url);
+    }else{
+        //没有code
+        url = [NSString stringWithFormat:@"%@%@", GIFTLISTAPI, [ControllerManager getSID]];
+        NSLog(@"gift_url:%@", url);
+    }
+    
+    httpDownloadBlock *request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock *load) {
+        if (isFinish) {
+            NSDictionary *dict = [load.dataDict objectForKey:@"data"];
+//            NSLog(@"更新礼物列表：%@",dict);
+            if ([[dict objectForKey:@"is_update"] intValue]) {
+                //该更新
+                [USER setObject:[dict objectForKey:@"code"] forKey:@"GiftCode"];
+                //存成一个大字典，里边根据gift_id为key，model为value
+                NSArray *array = [dict objectForKey:@"gifts"];
+                NSMutableDictionary *mutableDict = [NSMutableDictionary dictionaryWithCapacity:0];
+                if ([array isKindOfClass:[NSArray class]] && array.count) {
+                    for (NSDictionary *dic in array) {
+//                        NSLog(@"%@",dic);
+                        GiftsModel *model = [[GiftsModel alloc] init];
+                        [model setValuesForKeysWithDictionary:dic];
+                        [mutableDict setObject:model forKey:model.gift_id];
+                        [model release];
+                    }
+                }
+//                NSLog(@"%@",mutableDict);
+                
+                NSData *data = [MyControl returnDataWithDictionary:mutableDict];
+                [USER setObject:data forKey:@"GiftData"];
+            }
+        }else{
+            
+        }
+    }];
+}
++(NSDictionary *)returnTotalGiftDict
+{
+    NSData *data = [USER objectForKey:@"GiftData"];
+    NSDictionary *dict = [MyControl returnDictionaryWithData:data];
+//    NSLog(@"%@",dict);
+    if ([dict count]) {
+        return dict;
+    }else{
+        return nil;
+    }
+}
++(GiftsModel *)returnGiftsModelWithGiftId:(NSString *)giftId
+{
+    NSDictionary *dict = [self returnTotalGiftDict];
+//    NSLog(@"%@",dict);
+    if ([dict isKindOfClass:[NSDictionary class]]) {
+        GiftsModel *model = [dict objectForKey:giftId];
+        return model;
+    }else{
+        return nil;
+    }
+}
+
+#pragma mark -
++(UIImageView *)shareCatLoading
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        catLoadingImageView = [[UIImageView alloc] initWithFrame:CGRectMake((WIDTH-80)/2.0, (HEIGHT-50)/2.0, 80, 50)];
+        catLoadingImageView.animationImages = @[[UIImage imageNamed:@"catload_1"], [UIImage imageNamed:@"catload_2"], [UIImage imageNamed:@"catload_3"], [UIImage imageNamed:@"catload_4"], [UIImage imageNamed:@"catload_5"], [UIImage imageNamed:@"catload_6"], [UIImage imageNamed:@"catload_7"], [UIImage imageNamed:@"catload_8"], ];
+        catLoadingImageView.animationDuration = 0.4;
+        catLoadingImageView.animationRepeatCount = 0;
+    });
+    return catLoadingImageView;
+}
++(void)createLoading
+{
+    UIImageView *imageView = [self shareCatLoading];
+    [imageView startAnimating];
+    [[UIApplication sharedApplication].keyWindow addSubview:imageView];
+}
++(void)removecatLoading
+{
+    UIImageView *imageView = [self shareCatLoading];
+    [imageView stopAnimating];
+    [imageView removeFromSuperview];
+}
+
+#pragma mark -
+#pragma mark - 匹配图片
++ (NSAttributedString *)changToAttributedText:(NSString *)str{
+    //创建一个可变的属性字符串
+    NSMutableAttributedString *attributeString = [[[NSMutableAttributedString alloc] initWithString:str] autorelease];
+    //正则匹配要替换的文字的范围
+    //正则表达式
+    NSString * pattern = @"\\[[a-zA-Z0-9\\u4e00-\\u9fa5]+\\]";
+    NSError *error = nil;
+    NSRegularExpression * re = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+    if (!re) {
+        NSLog(@"%@", [error localizedDescription]);
+    }
+    //通过正则表达式来匹配字符串
+    NSArray *resultArray = [re matchesInString:str options:0 range:NSMakeRange(0, str.length)];
+    //
+    NSMutableArray *imageArray = [NSMutableArray arrayWithCapacity:resultArray.count];
+    //根据匹配范围来用图片进行相应的替换
+    for(NSTextCheckingResult *match in resultArray) {
+        //获取数组元素中得到range
+        NSRange range = [match range];
+        
+        //获取原字符串中对应的值
+        NSString *subStr = [str substringWithRange:range];
+        NSString *plist = [[NSBundle mainBundle] pathForResource:@"EmotionIcons/lxh/lxh-info.plist" ofType:nil];
+//        NSLog(@"%@",plist);
+        NSArray *face = [[NSArray alloc] initWithContentsOfFile:plist];
+        for (int i = 0; i < face.count; i ++)
+        {
+            if ([face[i][@"chs"] isEqualToString:subStr])
+            {
+                //face[i][@"gif"]就是我们要加载的图片
+                //新建文字附件来存放我们的图片
+                NSTextAttachment *textAttachment = [[NSTextAttachment alloc] init];
+                //给附件添加图片
+                textAttachment.image = [UIImage imageNamed:face[i][@"png"]];
+                //把附件转换成可变字符串，用于替换掉源字符串中的表情文字
+                NSAttributedString *imageStr = [NSAttributedString attributedStringWithAttachment:textAttachment];
+                //把图片和图片对应的位置存入字典中
+                NSMutableDictionary *imageDic = [NSMutableDictionary dictionaryWithCapacity:2];
+                [imageDic setObject:imageStr forKey:@"image"];
+                [imageDic setObject:[NSValue valueWithRange:range] forKey:@"range"];
+                //把字典存入数组中
+                [imageArray addObject:imageDic];
+            }
+        }
+    }
+    //从后往前替换
+    for (int i = (int)imageArray.count -1; i >= 0; i--)
+    {
+        NSRange range;
+        [imageArray[i][@"range"] getValue:&range];
+        //进行替换
+        [attributeString replaceCharactersInRange:range withAttributedString:imageArray[i][@"image"]];
+    }
+    return attributeString;
+    
 }
 @end

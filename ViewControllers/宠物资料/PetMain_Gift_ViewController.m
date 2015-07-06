@@ -41,9 +41,10 @@
                 [self.goodsNumArray removeAllObjects];
                 
                 for (NSString * itemId in [dict allKeys]) {
-                    if ([itemId intValue]%10 >4 || [itemId intValue]>=2200) {
-                        continue;
-                    }
+                    // 5.28 显示所有礼物，注释了以下三行
+//                    if ([itemId intValue]%10 >4 || [itemId intValue]>=2200) {
+//                        continue;
+//                    }
                     [self.goodsArray addObject:itemId];
                 }
                 //排序
@@ -117,9 +118,10 @@
     float spe = (self.view.frame.size.width-40-85*3)/2.0;
     for(int i=0;i<self.goodsArray.count;i++){
         CGRect rect = CGRectMake(20+i%3*(85+spe), 15+i/3*100, 85, 90);
-        NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:self.goodsArray[i]];
+        GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:self.goodsArray[i]];
+//        NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:self.goodsArray[i]];
         UIImageView * imageView = [MyControl createImageViewWithFrame:rect ImageName:@"product_bg.png"];
-        if ([[dict objectForKey:@"no"] intValue]>=2000) {
+        if ([model.gift_id intValue]>=2000) {
             imageView.image = [UIImage imageNamed:@"trick_bg.png"];
         }
         [sv addSubview:imageView];
@@ -134,22 +136,23 @@
         
         UILabel * rqNum = [MyControl createLabelWithFrame:CGRectMake(-1, 11, 25, 10) Font:8 Text:@"+150"];
         rqNum.font = [UIFont systemFontOfSize:8];
-        if ([[dict objectForKey:@"add_rq"] rangeOfString:@"-"].location == NSNotFound) {
-            rqNum.text = [NSString stringWithFormat:@"+%@", [dict objectForKey:@"add_rq"]];
+        if ([model.add_rq rangeOfString:@"-"].location == NSNotFound) {
+            rqNum.text = [NSString stringWithFormat:@"+%@", model.add_rq];
         }else{
-            rqNum.text = [dict objectForKey:@"add_rq"];
+            rqNum.text = model.add_rq;
         }
         rqNum.transform = CGAffineTransformMakeRotation(-45.0*M_PI/180.0);
         rqNum.textAlignment = NSTextAlignmentCenter;
         //            rqNum.backgroundColor = [UIColor redColor];
         [imageView addSubview:rqNum];
         
-        UILabel * giftName = [MyControl createLabelWithFrame:CGRectMake(0, 5, 85, 15) Font:11 Text:[dict objectForKey:@"name"]];
+        UILabel * giftName = [MyControl createLabelWithFrame:CGRectMake(0, 5, 85, 15) Font:11 Text:model.name];
         giftName.textColor = [UIColor grayColor];
         giftName.textAlignment = NSTextAlignmentCenter;
         [imageView addSubview:giftName];
         
-        UIImageView * giftPic = [MyControl createImageViewWithFrame:CGRectMake(13, 20, 59, 50) ImageName:[NSString stringWithFormat:@"%@.png", [dict objectForKey:@"no"]]];
+        UIImageView * giftPic = [MyControl createImageViewWithFrame:CGRectMake(13, 20, 59, 50) ImageName:@""];
+        [giftPic setImageWithURL:[NSURL URLWithString:model.detail_image]];
         [imageView addSubview:giftPic];
         
         UIImageView * gift = [MyControl createImageViewWithFrame:CGRectMake(20, 90-14-5, 12, 14) ImageName:@"detail_gift.png"];
@@ -166,7 +169,7 @@
 }
 -(void)buttonClick:(UIButton *)btn
 {
-    NSLog(@"%d", btn.tag);
+    NSLog(@"%ld", btn.tag);
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

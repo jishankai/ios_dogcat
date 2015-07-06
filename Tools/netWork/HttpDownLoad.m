@@ -41,7 +41,7 @@
     if ([fileManager fileExistsAtPath:self.FileName]&&[fileManager timeOutWithPath:self.FileName time:60*60]) {
         //文件没有超时 原来保存的数据可用
         //读取本地保存数据源
-        self.data=[NSData dataWithContentsOfFile:self.FileName];
+        self.data = [NSMutableData dataWithContentsOfFile:self.FileName];
         //解析 调用完成的方法
        // [self connectionDidFinishLoading:nil];
         [self jsonFinishLoading];
@@ -110,12 +110,5 @@
         [self.delegate httpRequestFinishorFail:self isFinish:NO];
     }
 }
-
-
-
-
-
-
-
 
 @end

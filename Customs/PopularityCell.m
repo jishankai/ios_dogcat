@@ -55,6 +55,12 @@
         self.upDown.image = [UIImage imageNamed:@"list_equal.png"];
     }
     
+    if (self.isFromVoteRank) {
+        self.upDown.hidden = YES;
+    }else{
+        self.upDown.hidden = NO;
+    }
+    
     if (large) {
         [UIView animateWithDuration:0.5 animations:^{
             self.headImageView.frame = CGRectMake(10, 2, 46, 46);

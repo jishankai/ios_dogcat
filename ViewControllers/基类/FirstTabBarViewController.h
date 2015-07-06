@@ -20,7 +20,7 @@
     UIImageView * bgImageView;
     
     BOOL isLoaded;
-    UIView * bottomBg;
+    UIImageView * bottomBg;
     
     
     
@@ -43,4 +43,7 @@
 
 -(void)modifyUI;
 -(void)refreshMessageNum;
+
+-(void)hideBottom;
+-(void)showBottom;
 @end

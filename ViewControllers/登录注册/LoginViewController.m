@@ -198,9 +198,10 @@
     //设置回调对象
     //    [UMSocialControllerService defaultControllerService].socialUIDelegate = self;
 }
+#define mark - 微信第三方登陆返回的信息
 -(void)getUserWeChatInfo{
     [[UMSocialDataService defaultDataService] requestSnsInformation:UMShareToWechatSession  completion:^(UMSocialResponseEntity *response){
-        NSLog(@"SnsInformation is %@",response.data);
+        NSLog(@"SnsInformation is == %@",response.data);
         NSDictionary * dic = (NSDictionary *)response.data;
 
         NSString * Url = [NSString stringWithFormat:@"https://api.weixin.qq.com/sns/userinfo?access_token=%@&openid=%@", [dic objectForKey:@"access_token"], [dic objectForKey:@"openid"]];
@@ -209,6 +210,7 @@
             if (isFinish) {
 //                ENDLOADING;
                 NSDictionary * dict = load.dataDict;
+                NSLog(@"dataDict is == %@",load.dataDict);
                 [USER setObject:dict forKey:@"weChatUserInfo"];
                 [USER setObject:@"" forKey:@"sinaUserInfo"];
                 

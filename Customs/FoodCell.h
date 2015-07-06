@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "BegFoodListModel.h"
+
+
 @interface FoodCell : UITableViewCell
 {
     UIView * whiteView;
@@ -15,7 +17,7 @@
     UIImageView * bigImageView;
     NSTimer * timer;
     
-    UILabel * desLabel;
+    HMEmotionTextView * desLabel;
     UIView * line;
     UILabel * foodNum;
 

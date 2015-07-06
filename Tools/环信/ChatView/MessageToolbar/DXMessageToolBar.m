@@ -12,10 +12,19 @@
 
 #import "DXMessageToolBar.h"
 
-@interface DXMessageToolBar()<UITextViewDelegate, DXFaceDelegate>
+#import "HMEmotion.h"
+#import "HMEmotionKeyboard.h"
+
+
+@interface DXMessageToolBar()<UITextViewDelegate>
 {
     CGFloat _previousTextViewContentHeight;//上一次inputTextView的contentSize.height
 }
+
+////5、表情键盘
+@property (nonatomic, retain) HMEmotionKeyboard *faceView;
+////6.是否正在切换键盘
+//@property (nonatomic, assign, getter = isChangingKeyboard) BOOL changingKeyboard;
 
 @property (nonatomic) CGFloat version;
 
@@ -33,6 +42,8 @@
 @property (strong, nonatomic) UIButton *moreButton;
 @property (strong, nonatomic) UIButton *faceButton;
 @property (strong, nonatomic) UIButton *recordButton;
+//
+@property (strong, nonatomic) UIButton *sendButton;
 
 /**
  *  底部扩展页面
@@ -53,8 +64,17 @@
     if (self) {
         // Initialization code
         [self setupConfigure];
+        [self setNotification];
     }
     return self;
+}
+
+- (void)setNotification{
+    // 监听表情选中的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(emotionDidSelected:) name:HMEmotionDidSelectedNotification object:nil];
+    // 监听删除按钮点击的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(emotionDidDeleted:) name:HMEmotionDidDeletedNotification object:nil];
+
 }
 
 - (void)setFrame:(CGRect)frame
@@ -88,6 +108,97 @@
     _inputTextView.delegate = nil;
     _inputTextView = nil;
 }
+
+//键盘
+//- (HMEmotionKeyboard *)kerboard
+//{
+//    if (!_kerboard) {
+//        self.kerboard = [HMEmotionKeyboard keyboard];
+//        self.kerboard.width = HMScreenW;
+//        self.kerboard.height = 216;
+//    }
+//    return _kerboard;
+//}
+////隐藏键盘
+//-(void)resignKeyboard
+//{
+//    [_inputTextView resignFirstResponder];
+//    
+//    //    [self performSelector:@selector(test) withObject:nil afterDelay:0.3];
+//}
+////-(void)IQKeyboardHide
+////{
+////    [self performSelector:@selector(test) withObject:nil afterDelay:0.3];
+////}
+//
+////4.10.图标点击方法
+//- (void)emoticonButtonAction{
+////    if(isClick == NO)
+////    {
+////        [self.emoticonButton setBackgroundImage:[UIImage imageNamed:@"compose_keyboardbutton_background_highlighted@2x"] forState:UIControlStateNormal];
+////        isClick = YES;
+////    }else {
+////        [self.emoticonButton setBackgroundImage:[UIImage imageNamed:@"compose_emoticonbutton_background_highlighted@2x"] forState:UIControlStateNormal];
+////        //        [self.emoticonButton setTitle:@"Play" forState:UIControlStateNormal];
+////        isClick = NO;
+////    }
+//    NSLog(@"打开表情键盘");
+//    [_inputTextView resignFirstResponder];
+//    [self openEmotion];
+//    
+//    
+//}
+//#pragma mark - UITextViewDelegate
+///**
+// *  当用户开始拖拽scrollView时调用
+// */
+//- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+//{
+//    [self endEditing:YES];
+//}
+//
+///**
+// *  当textView的文字改变就会调用
+// */
+////- (void)textViewDidChange:(UITextView *)textView
+////{
+////    self.navigationItem.rightBarButtonItem.enabled = textView.hasText;
+////}
+//
+///**
+// *  当表情选中的时候调用
+// *
+// *  @param note 里面包含了选中的表情
+// */
+- (void)emotionDidSelected:(NSNotification *)note
+{
+    HMEmotion *emotion = note.userInfo[HMSelectedEmotion];
+    
+    // 1.拼接表情
+    [_inputTextView appendEmotion:emotion];
+    
+    // 2.检测文字长度
+    [self textViewDidChange:_inputTextView];
+}
+//
+///**
+// *  当点击表情键盘上的删除按钮时调用
+// */
+- (void)emotionDidDeleted:(NSNotification *)note
+{
+    // 往回删
+    [_inputTextView deleteBackward];
+}
+//
+-(void)keyboardDisAppear
+{
+    [_inputTextView resignFirstResponder];
+}
+-(void)keyboardAppear
+{
+    [_inputTextView becomeFirstResponder];
+}
+//#pragma mark -
 
 #pragma mark - getter
 
@@ -173,15 +284,18 @@
     [textView resignFirstResponder];
 }
 
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+- (BOOL)textView:(XHMessageTextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     if ([text isEqualToString:@"\n"]) {
         if ([self.delegate respondsToSelector:@selector(didSendText:)]) {
-            [self.delegate didSendText:textView.text];
+            NSString *sendStr = textView.realText;
+            [self.delegate didSendText:sendStr];
             self.inputTextView.text = @"";
             [self willShowInputTextViewToHeight:[self getTextViewContentH:self.inputTextView]];;
+            //隐藏发送按钮
+            self.sendButton.hidden = YES;
+            self.moreButton.hidden = NO;
         }
-        
         return NO;
     }
     return YES;
@@ -190,44 +304,55 @@
 - (void)textViewDidChange:(UITextView *)textView
 {
     [self willShowInputTextViewToHeight:[self getTextViewContentH:textView]];
+//    self.navigationItem.rightBarButtonItem.enabled = textView.hasText;
+    if (textView.text.length > 0) {
+        self.sendButton.hidden = NO;
+        self.moreButton.hidden = YES;
+    } else {
+        self.sendButton.hidden = YES;
+        self.moreButton.hidden = NO;
+    }
 }
 
 #pragma mark - DXFaceDelegate
 
-- (void)selectedFacialView:(NSString *)str isDelete:(BOOL)isDelete
-{
-    NSString *chatText = self.inputTextView.text;
-    
-    if (!isDelete && str.length > 0) {
-        self.inputTextView.text = [NSString stringWithFormat:@"%@%@",chatText,str];
-    }
-    else {
-        if (chatText.length >= 2)
-        {
-            NSString *subStr = [chatText substringFromIndex:chatText.length-2];
-            if ([(DXFaceView *)self.faceView stringIsFace:subStr]) {
-                self.inputTextView.text = [chatText substringToIndex:chatText.length-2];
-                
-                return;
-            }
-        }
-        
-        if (chatText.length > 0) {
-            self.inputTextView.text = [chatText substringToIndex:chatText.length-1];
-        }
-    }
-    
-    [self textViewDidChange:self.inputTextView];
-}
+//- (void)selectedFacialView:(NSString *)str isDelete:(BOOL)isDelete
+//{
+//    NSString *chatText = self.inputTextView.text;
+//    
+//    if (!isDelete && str.length > 0) {
+//        self.inputTextView.text = [NSString stringWithFormat:@"%@%@",chatText,str];
+//    }
+//    else {
+//        if (chatText.length >= 2)
+//        {
+//            NSString *subStr = [chatText substringFromIndex:chatText.length-2];
+//            if ([(DXFaceView *)self.faceView stringIsFace:subStr]) {
+//                self.inputTextView.text = [chatText substringToIndex:chatText.length-2];
+//                
+//                return;
+//            }
+//        }
+//        
+//        if (chatText.length > 0) {
+//            self.inputTextView.text = [chatText substringToIndex:chatText.length-1];
+//        }
+//    }
+//    
+//    [self textViewDidChange:self.inputTextView];
+//}
 
 - (void)sendFace
 {
-    NSString *chatText = self.inputTextView.text;
+    NSString *chatText = self.inputTextView.realText;
     if (chatText.length > 0) {
         if ([self.delegate respondsToSelector:@selector(didSendText:)]) {
             [self.delegate didSendText:chatText];
             self.inputTextView.text = @"";
             [self willShowInputTextViewToHeight:[self getTextViewContentH:self.inputTextView]];;
+            //隐藏发送按钮
+            self.sendButton.hidden = YES;
+            self.moreButton.hidden = NO;
         }
     }
 }
@@ -301,6 +426,16 @@
     self.moreButton.tag = 2;
     allButtonWidth += CGRectGetWidth(self.moreButton.frame) + kHorizontalPadding * 2.5;
     
+    // 6.9日新增
+    self.sendButton = [[UIButton alloc]initWithFrame:CGRectMake(CGRectGetWidth(self.bounds) - kHorizontalPadding - kInputTextViewMinHeight - 5, kVerticalPadding, kInputTextViewMinHeight + 10, kInputTextViewMinHeight)]; //buttonWithType:UIButtonTypeRoundedRect];
+    self.sendButton.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+    self.sendButton.layer.cornerRadius = 5.0f;
+    [self.sendButton setTitleColor:BGCOLOR forState:UIControlStateNormal];
+    [self.sendButton setTitle:@"发送" forState:UIControlStateNormal];
+    self.sendButton.backgroundColor = [UIColor whiteColor];
+    [self.sendButton addTarget:self action:@selector(sendButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    self.sendButton.hidden = YES;
+    
     //表情
     self.faceButton = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMinX(self.moreButton.frame) - kInputTextViewMinHeight - kHorizontalPadding, kVerticalPadding, kInputTextViewMinHeight, kInputTextViewMinHeight)];
     self.faceButton.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
@@ -352,9 +487,10 @@
     }
     
     if (!self.faceView) {
-        self.faceView = [[DXFaceView alloc] initWithFrame:CGRectMake(0, (kVerticalPadding * 2 + kInputTextViewMinHeight), self.frame.size.width, 200)];
-        [(DXFaceView *)self.faceView setDelegate:self];
-        self.faceView.backgroundColor = [UIColor lightGrayColor];
+        self.faceView = [[HMEmotionKeyboard alloc] initWithFrame:CGRectMake(0, (kVerticalPadding * 2 + kInputTextViewMinHeight), self.frame.size.width, 220)];
+        
+//        [(DXFaceView *)self.faceView setDelegate:self];
+        self.faceView.backgroundColor = [UIColor whiteColor];
         self.faceView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
     }
     
@@ -367,6 +503,7 @@
     [self.toolbarView addSubview:self.faceButton];
     [self.toolbarView addSubview:self.inputTextView];
     [self.toolbarView addSubview:self.recordButton];
+    [self.toolbarView addSubview:self.sendButton];
 }
 
 #pragma mark - change frame
@@ -484,6 +621,10 @@
 }
 
 #pragma mark - action
+// 6.9 发送
+- (void)sendButtonAction{
+    [self sendFace];
+}
 
 - (void)buttonAction:(id)sender
 {
@@ -533,7 +674,7 @@
                 else{//如果处于文字输入状态，使文字输入框失去焦点
                     [self.inputTextView resignFirstResponder];
                 }
-                
+               // 、、、、
                 [self willShowBottomView:self.faceView];
                 [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                     self.recordButton.hidden = button.selected;

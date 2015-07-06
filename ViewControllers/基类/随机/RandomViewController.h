@@ -51,4 +51,12 @@
 
 //-(void)shutdownList;
 //-(void)openList;
+@property(nonatomic,copy)void (^rollUp)(void);
+@property(nonatomic,copy)void (^rollDown)(void);
+//@property(nonatomic,copy)void (^rollStop)(void);
+
+
+-(void)adjustRandomToBig;
+-(void)adjustRandomBigWithTop;
+-(void)adjustRandomToNormal;
 @end

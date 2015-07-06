@@ -43,7 +43,6 @@
     if ([super.text isEqualToString:_placeholder] && super.textColor == _placeholderColor) {
         return @"";
     }
-    
     return [super text];
 }
 

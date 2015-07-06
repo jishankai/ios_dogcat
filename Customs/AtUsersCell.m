@@ -80,9 +80,9 @@
     button.selected = !button.selected;
 //    NSLog(@"点击了第%d个", btn.tag-100);
     if (button.selected) {
-        self.click(btn.tag-100, YES);
+        self.click((int)btn.tag-100, YES);
     }else{
-        self.click(btn.tag-100, NO);
+        self.click((int)btn.tag-100, NO);
     }
     
 }

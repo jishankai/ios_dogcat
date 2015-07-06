@@ -8,7 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "ClickImage.h"
-@interface FrontImageDetailViewController : UIViewController <UITableViewDataSource,UITableViewDelegate,UIActionSheetDelegate,UITextFieldDelegate>
+
+#import "HMEmotionTextView.h"
+#import "HMEmotion.h"
+#import "HMEmotionKeyboard.h"
+
+@interface FrontImageDetailViewController : UIViewController <UITableViewDataSource,UITableViewDelegate,UIActionSheetDelegate,UITextViewDelegate>
 {
     UIView * bgView;
     UIScrollView * sv;
@@ -19,7 +24,7 @@
     UIView * imageBgView2;
     //
     ClickImage * bigImageView;
-    UILabel * desLabel;
+    HMEmotionTextView * desLabel;
     UILabel * topicLabel;
     UILabel * timeLabel;
     
@@ -50,7 +55,9 @@
     //评论
     UIButton * bgButton;
     UIView * commentBgView;
-    UITextField * commentTextField;
+    HMEmotionTextView * commentTextField;
+    //表情button点击状态
+    BOOL isClick;
     
     //判断是否在当前控制器，来限制键盘变化通知
     BOOL isInThisController;
@@ -83,6 +90,13 @@
     //判断当前图片是否是求口粮图片并且未过时
     NSInteger is_food;
 }
+//4、表情button
+@property(nonatomic, retain)UIButton *emoticonButton;
+//5、表情键盘
+@property (nonatomic, retain) HMEmotionKeyboard *kerboard;
+//6.是否正在切换键盘
+@property (nonatomic, assign, getter = isChangingKeyboard) BOOL changingKeyboard;
+
 @property(nonatomic,retain)NSDictionary * picDict;
 @property(nonatomic,retain)NSDictionary * imageDict;
 
@@ -111,6 +125,11 @@
 @property (nonatomic,retain)NSMutableArray * sharersArray;
 
 @property (nonatomic)BOOL isFromRandom;
+
 @property (nonatomic,copy)NSURL * imageURL;
 @property (nonatomic,copy)NSString * imageCmt;
+//显示背面第几列 1,2,3,4
+@property (nonatomic)NSInteger showBackIndex;
+//如果来自GoRecommend在退出详情时不显示tabBar
+@property (nonatomic)BOOL isFromGoRecommend;
 @end

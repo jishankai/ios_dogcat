@@ -196,7 +196,7 @@
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    int x = indexPath.row;
+    NSInteger x = indexPath.row;
     if (x == 0) {
         //设置密码
         SetPasswordViewController * vc = [[SetPasswordViewController alloc] init];
@@ -208,7 +208,7 @@
         
     }else if (x == 1) {
         //切换账号
-        NSLog(@"%d--%d", [[USER objectForKey:@"password"] isKindOfClass:[NSString class]], [[USER objectForKey:@"password"] length]);
+        NSLog(@"%d--%ld", [[USER objectForKey:@"password"] isKindOfClass:[NSString class]], [[USER objectForKey:@"password"] length]);
 //        if (![[USER objectForKey:@"password"] isKindOfClass:[NSString class]] || ![[USER objectForKey:@"password"] length]) {
             Alert_HyperlinkView * hyper = [[Alert_HyperlinkView alloc] initWithFrame:[UIScreen mainScreen].bounds];
             hyper.type = 1;
@@ -420,7 +420,7 @@
     }
     
     CodeAlertView * codeView = [[CodeAlertView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
-    codeView.AlertType = 1;
+    codeView.alertType = 1;
     [codeView makeUI];
     [self.view addSubview:codeView];
     [UIView animateWithDuration:0.2 animations:^{
@@ -469,7 +469,7 @@
 -(void)codeViewSuccess:(InviteCodeModel *)model
 {
     CodeAlertView * codeView = [[CodeAlertView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
-    codeView.AlertType = 2;
+    codeView.alertType = 2;
     codeView.codeModel = model;
     [codeView makeUI];
     [self.view addSubview:codeView];
@@ -483,7 +483,7 @@
 -(void)codeViewFailed:(InviteCodeModel *)model
 {
     CodeAlertView * codeView = [[CodeAlertView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
-    codeView.AlertType = 3;
+    codeView.alertType = 3;
     codeView.codeModel = model;
     [codeView makeUI];
     [self.view addSubview:codeView];
@@ -569,7 +569,7 @@
 #pragma mark -
 -(void)switchChange:(UISwitch *)swit
 {
-    int a = swit.tag-100;
+    NSInteger a = swit.tag-100;
 //    if (isConfVersion) {
 //        a -= 1;
 //    }

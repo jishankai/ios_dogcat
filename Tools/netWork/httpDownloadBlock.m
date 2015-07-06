@@ -317,7 +317,7 @@
     }
     if (type1 == 1 || type2 == 1) {
         NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"version=%@dog&cat", outVer]];
-        NSString * url = [NSString stringWithFormat:@"%@%@&sig=%@&SID=%@", UPDATEAPI, outVer, sig, [ControllerManager getSID]];
+        NSString * url = [NSString stringWithFormat:@"%@%@&sig=%@", UPDATEAPI, outVer, sig];
         NSLog(@"下载更新内容API：%@", url);
         
         __block httpDownloadBlock * blockSelf = self;
@@ -353,7 +353,7 @@
 #pragma mark - delegate
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    NSLog(@"%d", buttonIndex);
+    NSLog(@"%ld", buttonIndex);
     if(isForce){
         if (buttonIndex == 0) {
             //马上更新

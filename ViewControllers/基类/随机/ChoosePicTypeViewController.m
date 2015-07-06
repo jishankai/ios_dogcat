@@ -36,8 +36,8 @@
     UIActionSheet * sheet;
     
 }
-@property (nonatomic) int currentSelectedIndex;
-@property (nonatomic) int publishType;
+@property (nonatomic,assign) NSInteger currentSelectedIndex;
+@property (nonatomic,assign) NSInteger publishType;
 
 @property (nonatomic, retain) NSMutableArray * petsDataArray;
 @property (nonatomic, retain) NSDictionary * menuDataDict;
@@ -73,7 +73,7 @@
     self.menuListArray = [USER objectForKey:@"MenuList"];
     self.menuDataDict = [MyControl returnDictionaryWithData:[USER objectForKey:@"MenuData"]];
     
-    self.count = self.menuListArray.count;
+    self.count = (int)self.menuListArray.count;
     
     [self adjustUI];
 //    if ([[USER objectForKey:@"MenuData"] isKindOfClass:[NSData class]]){
@@ -428,6 +428,7 @@
     NSLog(@"晒照片");
     self.publishType = 0;
     [self camaraClick];
+//    [self judgeFood:self.publishType];
 }
 -(void)foodBtnClick
 {
@@ -448,13 +449,13 @@
     [self judgeFood:self.publishType];
 }
 #pragma mark -
--(void)judgeFood:(int)type
+-(void)judgeFood:(NSInteger)type
 {
     //请求API判断是否是否能发图
     LOADING;
     NSDictionary * dict = self.petsDataArray[self.currentSelectedIndex];
-    NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"aid=%@&is_food=%ddog&cat", [dict objectForKey:@"aid"], type]];
-    NSString * url = [NSString stringWithFormat:@"%@%@&is_food=%d&sig=%@&SID=%@", JUDGEDOAPI, [dict objectForKey:@"aid"], type, sig, [ControllerManager getSID]];
+    NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"aid=%@&is_food=%lddog&cat", [dict objectForKey:@"aid"], type]];
+    NSString * url = [NSString stringWithFormat:@"%@%@&is_food=%ld&sig=%@&SID=%@", JUDGEDOAPI, [dict objectForKey:@"aid"], type, sig, [ControllerManager getSID]];
     NSLog(@"%@", url);
 //    __block NSDictionary * blockDict = dict;
     __block ChoosePicTypeViewController * blockSelf = self;
@@ -567,9 +568,9 @@
 #pragma mark - UIImagePicker Delegate
 - (void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    NSLog(@"%@", info);
+    NSLog(@"choosePicTypeVC %@", info);
     UIImage * image = [info objectForKey:UIImagePickerControllerOriginalImage];
-    NSLog(@"%d", image.imageOrientation);
+    NSLog(@"%ld", image.imageOrientation);
     image = [MyControl fixOrientation:image];
     
     __block ChoosePicTypeViewController * blockSelf = self;
@@ -579,7 +580,7 @@
         [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
         PublishViewController * vc = [[PublishViewController alloc] init];
         
-        vc.publishType = blockSelf.publishType;
+        vc.publishType = (int)blockSelf.publishType;
         if (blockSelf.publishType == 1) {
             vc.isBeg = YES;
         }
@@ -590,7 +591,9 @@
         
         vc.oriImage = image;
         vc.name = model.name;
+        
         vc.aid = model.aid;
+        
         vc.showFrontImage = ^(NSString * img_id, NSInteger isFood, NSString * aid, NSString * name){
             if (!isFood) {
                 __block FrontImageDetailViewController * front = [[FrontImageDetailViewController alloc] init];
@@ -599,8 +602,8 @@
                 [ControllerManager addTabBarViewController:front];
                 
             }else{
-                NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"aid=%@&is_food=%ddog&cat", [dict objectForKey:@"aid"], isFood]];
-                NSString * url = [NSString stringWithFormat:@"%@%@&is_food=%d&sig=%@&SID=%@", JUDGEDOAPI, [dict objectForKey:@"aid"], isFood, sig, [ControllerManager getSID]];
+                NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"aid=%@&is_food=%lddog&cat", [dict objectForKey:@"aid"], isFood]];
+                NSString * url = [NSString stringWithFormat:@"%@%@&is_food=%ld&sig=%@&SID=%@", JUDGEDOAPI, [dict objectForKey:@"aid"], isFood, sig, [ControllerManager getSID]];
                 NSLog(@"%@", url);
                 httpDownloadBlock * request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock * load) {
                     if ([[[load.dataDict objectForKey:@"data"] objectForKey:@"r"] isKindOfClass:[NSDictionary class]]) {

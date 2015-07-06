@@ -40,17 +40,18 @@
     __block PetMain_Active_ViewController * blockSelf = self;
     httpDownloadBlock *request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock * load) {
         if (isFinish) {
-//            NSLog(@"国王动态数据：%@",load.dataDict);
             [blockSelf.dataArray removeAllObjects];
+//            NSLog(@"动态数据：%@",load.dataDict);
             NSArray * array = [load.dataDict objectForKey:@"data"];
             for (int i=0; i<array.count; i++) {
                 PetNewsModel * model = [[PetNewsModel alloc] init];
                 [model setValuesForKeysWithDictionary:array[i]];
                 model.content = [array[i] objectForKey:@"content"];
                 if([model.type intValue] != 1){
-                    if(!(([model.type intValue] == 4 || [model.type intValue] == 7) && ([[model.content objectForKey:@"item_id"] intValue]%10 >4 || [[model.content objectForKey:@"item_id"] intValue]>=2200))){
+                    // 5.28 动态里显示新的商品，去掉筛选条件
+//                    if(!(([model.type intValue] == 4 || [model.type intValue] == 7) && ([[model.content objectForKey:@"item_id"] intValue]%10 >4 || [[model.content objectForKey:@"item_id"] intValue]>=2200))){
                         [blockSelf.dataArray addObject:model];
-                    }
+//                    }
                     
                 }
                 [model release];
@@ -184,7 +185,7 @@
     };
     return cell;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     PetNewsModel * model = self.dataArray[indexPath.row];
     int a = [model.type intValue];

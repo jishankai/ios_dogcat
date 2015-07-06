@@ -213,7 +213,7 @@
 #pragma mark - collectionDelegate
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"%d", indexPath.row);
+    NSLog(@"petmain_p_vc %ld", indexPath.row);
     FrontImageDetailViewController * vc = [[FrontImageDetailViewController alloc] init];
     vc.img_id = [self.dataArray[indexPath.row] img_id];
     

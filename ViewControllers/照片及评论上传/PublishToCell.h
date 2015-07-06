@@ -11,7 +11,7 @@
 
 @interface PublishToCell : UITableViewCell
 {
-    int a;
+    NSInteger a;
 }
 @property (retain, nonatomic) IBOutlet UIImageView *headImage;
 @property (retain, nonatomic) IBOutlet UIImageView *crown;
@@ -20,8 +20,8 @@
 @property (retain, nonatomic) IBOutlet UILabel *cateAndAge;
 @property (retain, nonatomic) UIButton *selectBtn;
 
-@property (copy,nonatomic)void (^selectBlock)(int);
+@property (copy,nonatomic)void (^selectBlock)(NSInteger);
 //@property (copy,nonatomic)void (^unSelectBlock)(int);
 
--(void)configUI:(UserPetListModel *)model Index:(int)index BtnSelected:(BOOL)select;
+-(void)configUI:(UserPetListModel *)model Index:(NSInteger)index BtnSelected:(BOOL)select;
 @end

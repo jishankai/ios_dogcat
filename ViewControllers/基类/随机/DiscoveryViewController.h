@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "RandomViewController.h"
 #import "PetRecommendViewController.h"
 #import "NIDropDown.h"
 
@@ -21,7 +20,7 @@
     UITableView * tv;
 //    UITableView * tv2;
     
-    RandomViewController * vc;
+//    RandomViewController * vc;
     PetRecommendViewController * vc2;
     
     //榜单是否加载过

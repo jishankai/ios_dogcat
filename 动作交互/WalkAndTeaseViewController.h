@@ -21,6 +21,9 @@
 @property(nonatomic,copy)NSString * aid;
 
 @property(nonatomic)BOOL isFromBanner;
+//来自海选的banner
+@property(nonatomic)BOOL isFromMass;
+@property(nonatomic)BOOL isFromCenterRank;
 @property(nonatomic,copy)NSString * content;
 @property(nonatomic,copy)NSString * icon;
 @property(nonatomic,copy)NSString * share_title;

@@ -104,7 +104,7 @@
         UIButton * maskBtn = [MyControl createButtonWithFrame:CGRectMake(0, 0, 320*4, [UIScreen mainScreen].bounds.size.height) ImageName:@"" Target:self Action:@selector(maskBtnClick) Title:nil];
         [sv addSubview:maskBtn];
     }
-    int a = btn.tag-100;
+    NSInteger a = btn.tag-100;
     oriRect = btn.frame;
     sv.hidden = NO;
     sv.contentOffset = CGPointMake(320*a, 0);

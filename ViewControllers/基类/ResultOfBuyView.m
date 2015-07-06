@@ -27,7 +27,7 @@
     [_confirm release];
     [_shakeMore release];
     [_sendThis release];
-    [_closeBlock release];
+//    [_closeBlock release];
 }
 - (id)initWithFrame:(CGRect)frame
 {
@@ -126,14 +126,16 @@
         [self.confirmBtn setTitle:@"就送这个" forState:UIControlStateNormal];
     }
     
-    NSDictionary * dict = [ControllerManager returnGiftDictWithItemId:itemId];
+    GiftsModel *model = [ControllerManager returnGiftsModelWithGiftId:itemId];
+    
+    
     if (self.isFromShake) {
         self.titleLabel.text = @"摇一摇";
     }else{
         self.titleLabel.text = [NSString stringWithFormat:@"给%@送个礼物", name];
     }
     
-    self.giftNameLabel.text = [NSString stringWithFormat:@"%@ x 1", [dict objectForKey:@"name"]];
+    self.giftNameLabel.text = [NSString stringWithFormat:@"%@ x 1", model.name];
     
     if ([itemId intValue]>=2000) {
         rollView.hidden = YES;
@@ -144,7 +146,7 @@
         timer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(badLineAnimation) userInfo:nil repeats:YES];
         
         self.bgImageView.image = [UIImage imageNamed:@"alert_sendGift_bad.png"];
-        self.rqLabel.text = [NSString stringWithFormat:@"人气 %@", [dict objectForKey:@"add_rq"]];
+        self.rqLabel.text = [NSString stringWithFormat:@"人气 %@", model.add_rq];
     }else{
         badLineImageView.hidden = YES;
         if(!self.isFromShake){
@@ -157,14 +159,15 @@
         }
         
         self.bgImageView.image = [UIImage imageNamed:@"alert_sendGift_good.png"];
-        self.rqLabel.text = [NSString stringWithFormat:@"人气 +%@", [dict objectForKey:@"add_rq"]];
+        self.rqLabel.text = [NSString stringWithFormat:@"人气 +%@", model.add_rq];
     }
-    self.actLabel.text = [NSString stringWithFormat:@"%@%@", name,  [ControllerManager returnActionStringWithItemId:itemId]];
+    self.actLabel.text = model.effect_des;
     if(self.isFromShake){
-        self.actLabel.text = [NSString stringWithFormat:@"还有 %d 次机会\n每天只能送 1 个礼物哦~", self.leftShakeTimes];
+        self.actLabel.text = [NSString stringWithFormat:@"还有 %ld 次机会\n每天只能送 1 个礼物哦~", self.leftShakeTimes];
     }
     
-    self.giftImage.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", itemId]];
+    [self.giftImage setImageWithURL:[NSURL URLWithString:model.detail_image]];
+//    self.giftImage.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", itemId]];
 
     
     [MyControl setImageForImageView:self.headImage Tx:tx isPet:YES isRound:YES];

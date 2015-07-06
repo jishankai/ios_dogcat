@@ -87,8 +87,8 @@
 }
 -(void)buttonClick:(UIButton *)btn
 {
-    NSLog(@"%d", btn.tag);
-    int a = btn.tag-1000;
+    NSLog(@"%ld", btn.tag);
+    NSInteger a = btn.tag-1000;
     if (a ==0) {
         //微信
         UMSocialSnsPlatform *snsPlatform = [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToWechatSession];

@@ -19,6 +19,8 @@
 @property (retain, nonatomic) IBOutlet UIImageView *medal;
 @property (retain, nonatomic) IBOutlet UILabel *rank;
 @property (retain, nonatomic) IBOutlet UIImageView *upDown;
-@property(nonatomic,copy)void (^cellClick)(int);
+@property(nonatomic,copy)void (^cellClick)(NSInteger);
+
+@property (nonatomic)BOOL isFromVoteRank;
 -(void)configUIWithName:(NSString *)Name rq:(NSString *)Rq rank:(int)rank upOrDown:(NSInteger)isUp shouldLarge:(BOOL)large;
 @end

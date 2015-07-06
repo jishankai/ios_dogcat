@@ -23,6 +23,8 @@ extern NSString *const kRouterEventTextURLTapEventName;
 @interface EMChatTextBubbleView : EMChatBaseBubbleView
 
 @property (nonatomic, strong) UILabel *textLabel;
+
+//@property (nonatomic, strong) UILabel *textLabel;
 + (CGFloat)lineSpacing;
 + (UIFont *)textLabelFont;
 + (NSLineBreakMode)textLabelLineBreakModel;

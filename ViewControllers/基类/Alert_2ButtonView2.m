@@ -62,12 +62,14 @@
     UIButton * confirmBtn = [MyControl createButtonWithFrame:CGRectMake(bgView.frame.size.width-276/2*0.9-8, 346/2, 276/2*0.9, 93/2.0*0.9) ImageName:@"various_orangeBtn.png" Target:self Action:@selector(confirmClick) Title:@"没问题"];
     confirmBtn.titleLabel.font = [UIFont systemFontOfSize:17];
     [bgView addSubview:confirmBtn];
-    
+    NSLog(@"%d",self.type);
+
     if(self.type == 1){
         label1.text = [NSString stringWithFormat:@"本次打赏%@份口粮", self.rewardNum];
         label2.text = @"需要花费您：";
         
     }else if(self.type == 2){
+//        NSLog(@"%d",self.subType);
         if(self.subType == 1){
             label1.hidden = YES;
             label2.text = @"本次捧星需要花费您：";
@@ -76,9 +78,22 @@
             label1.hidden = YES;
             label2.text = @"本次购物需要花费您：";
             costLabel.text = self.rewardNum;
+        }else if(self.subType == 3){
+            label1.hidden = YES;
+            label2.text = @"本次推荐需要花费您：";
+            costLabel.text = self.rewardNum;
         }else{
-            label1.text = [NSString stringWithFormat:@"本次打赏%@份口粮", self.rewardNum];
-            label2.text = @"需要花费您：";
+            //FIXME: 推荐本应由其类型判断，单词处不是
+            //5.20 默认当需要三十金币时，是推荐的提示
+            if ([self.rewardNum isEqualToString:@"30"]) {
+                NSLog(@"self.subType:%d",self.subType);
+                label2.text = @"本次投票需要花费您：";
+                costLabel.text = self.rewardNum;
+            } else {
+                //5.20 一份口粮一份金币，所以只有1，10，100，1000
+                label1.text = [NSString stringWithFormat:@"本次打赏%@份口粮", self.rewardNum];
+                label2.text = @"需要花费您：";
+            }
         }
         
         
@@ -93,15 +108,14 @@
         selectLabel.textAlignment = NSTextAlignmentCenter;
         
         [confirmBtn setTitle:@"去充值" forState:UIControlStateNormal];
-        
+//        NSLog(@"ccccccccccccc");
+        ////////////////////////////// 由应用版本控制
         if([[USER objectForKey:@"confVersion"] isEqualToString:[USER objectForKey:@"versionKey"]]){
             selectLabel.text = @"先在应用挣钱吧~";
-            
             cancelBtn.hidden = YES;
             CGRect rect2 = confirmBtn.frame;
             rect2.origin.x = (bgView.frame.size.width-rect2.size.width)/2.0;
             confirmBtn.frame = rect2;
-            
             [confirmBtn setTitle:@"好吧" forState:UIControlStateNormal];
         }
         
@@ -184,6 +198,38 @@
         selectLabel.hidden = YES;
         goldImage.hidden = YES;
         costLabel.hidden = YES;
+    }else if(self.type == 6){
+        UILabel *titleLabel = [MyControl createLabelWithFrame:CGRectMake(0, 60, bgView.frame.size.width, 20) Font:16 Text:@"本次投票需要花费您："];
+        titleLabel.textAlignment = NSTextAlignmentCenter;
+        titleLabel.textColor = [UIColor colorWithRed:114/255.0 green:72/255.0 blue:43/255.0 alpha:1];
+        [bgView addSubview:titleLabel];
+        
+        CGRect rect = goldImage.frame;
+        rect.origin.y = titleLabel.frame.origin.y+30;
+        goldImage.frame = rect;
+    
+        
+        costLabel.text = self.voteCost;
+        costLabel.frame = CGRectMake(goldImage.frame.origin.x+goldImage.frame.size.width+10, goldImage.frame.origin.y+5, bgView.frame.size.width/2, 20);
+        costLabel.textColor = [ControllerManager colorWithHexString:@"7a7a7a"];
+        costLabel.font = [UIFont systemFontOfSize:16];
+        
+        cancelBtn.hidden = YES;
+        [confirmBtn setTitle:@"好的！" forState:UIControlStateNormal];
+        CGRect confirmRect = confirmBtn.frame;
+        confirmRect.origin.x = (bgView.frame.size.width-confirmRect.size.width)/2.0;
+        confirmBtn.frame = confirmRect;
+        
+    }else if(self.type == 7){
+        label1.text = @"先去创建你的宠物吧!";
+        [cancelBtn setTitle:@"稍等等" forState:UIControlStateNormal];
+        [confirmBtn setTitle:@"这就去~" forState:UIControlStateNormal];
+        [MyControl setOriginY:label1.frame.origin.y+50 WithView:label1];
+        
+        selectImage.hidden = YES;
+        selectLabel.hidden = YES;
+        costLabel.hidden = YES;
+        goldImage.hidden = YES;
     }
     
 //    if ([[USER objectForKey:@"showCostAlert"] intValue]) {
@@ -223,6 +269,10 @@
     }else if(self.type == 5){
         //送礼
         self.zbBlock(2);
+    }else if(self.type == 6){
+        self.confirmClickBlock();
+    }else if(self.type == 7){
+        self.createMyPetBlock();
     }
     [self removeFromSuperview];
 }
@@ -231,10 +281,19 @@
     btn.selected = !btn.selected;
     if (btn.selected) {
         selectImage.image = [UIImage imageNamed:@"atUsers_selected.png"];
-        [USER setObject:@"0" forKey:@"showCostAlert"];
+        if(self.type == 1){
+            [USER setObject:@"0" forKey:@"showCostAlert"];
+        }else if(self.type == 6){
+            [USER setObject:@"1" forKey:@"notShowVoteCostAlert"];
+        }
+        
     }else{
         selectImage.image = [UIImage imageNamed:@"atUsers_unSelected.png"];
-        [USER setObject:@"1" forKey:@"showCostAlert"];
+        if(self.type == 1){
+            [USER setObject:@"1" forKey:@"showCostAlert"];
+        }else if(self.type == 6){
+            [USER setObject:@"0" forKey:@"notShowVoteCostAlert"];
+        }
     }
 }
 /*

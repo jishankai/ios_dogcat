@@ -14,7 +14,7 @@
 -(void)setWebImage:(NSURL *)aUrl placeHolder:(UIImage *)placeHolder downloadFlag:(int)flag
     {
          
-        NSString *imagefile= [NSHomeDirectory() stringByAppendingFormat:@"/Library/Caches/%d.jpg",aUrl.description.hash];
+        NSString *imagefile= [NSHomeDirectory() stringByAppendingFormat:@"/Library/Caches/%ld.jpg",aUrl.description.hash];
         
         NSFileManager *fm=[NSFileManager defaultManager];
         
@@ -30,7 +30,7 @@
                 [self setImage:placeHolder];
             
             //配置下载路径
-            NSString *path=[NSHomeDirectory() stringByAppendingFormat:@"/Library/Caches/%d.jpg",aUrl.description.hash];
+            NSString *path=[NSHomeDirectory() stringByAppendingFormat:@"/Library/Caches/%ld.jpg",aUrl.description.hash];
             
             NSData *data=[NSData dataWithContentsOfFile:path];
             if (!data) {
@@ -42,7 +42,7 @@
            
             dispatch_async(dispatch_get_main_queue(), ^{
                 //UITableViewCell
-                NSString *imagefile= [NSHomeDirectory() stringByAppendingFormat:@"/Library/Caches/%d.jpg",aUrl.description.hash];
+                NSString *imagefile= [NSHomeDirectory() stringByAppendingFormat:@"/Library/Caches/%ld.jpg",aUrl.description.hash];
                 
                             NSFileManager *fm=[NSFileManager defaultManager];
                 

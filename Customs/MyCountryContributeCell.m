@@ -21,7 +21,7 @@
     self.headBtn.layer.masksToBounds = YES;
     self.headBtn.userInteractionEnabled = NO;
 }
--(void)modifyWithBOOL:(BOOL)isThis lineNum:(int)num
+-(void)modifyWithBOOL:(BOOL)isThis lineNum:(NSInteger)num
 {
     lineNum = num;
     self.circleBg.hidden = YES;
@@ -71,6 +71,7 @@
         str = [NSString stringWithFormat:@"%@ — ", [ControllerManager returnPositionWithRank:model.rank]];
     }
     CGSize size = [str sizeWithFont:[UIFont systemFontOfSize:15] constrainedToSize:CGSizeMake(100, 20) lineBreakMode:1];
+//    [str boundingRectWithSize:CGSizeMake(100, 20) options:NSStringDrawingTruncatesLastVisibleLine attributes:@{} context:(NSStringDrawingContext *)]
     self.positionLabel.text = str;
     CGRect rect = self.positionLabel.frame;
     rect.size.width = size.width;
@@ -100,7 +101,7 @@
     [MyControl setImageForBtn:self.headBtn Tx:model.tx isPet:NO isRound:YES];
 }
 - (IBAction)headBtnClick:(id)sender {
-    NSLog(@"点击头像--%d", self.headBtn.tag-10000);
+    NSLog(@"点击头像--%ld", self.headBtn.tag-10000);
     NSLog(@"usr_id:%@",usr_id);
 }
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated

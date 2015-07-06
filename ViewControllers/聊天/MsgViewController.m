@@ -169,7 +169,15 @@
 - (NSMutableArray *)loadDataSource
 {
     NSMutableArray *ret = nil;
-    NSArray *conversations = [[EaseMob sharedInstance].chatManager conversations];
+    NSMutableArray *conversations = [NSMutableArray arrayWithArray:[[EaseMob sharedInstance].chatManager conversations]];
+    for (int i=0; i<conversations.count; i++) {
+        EMConversation *conversation = conversations[i];
+        EMMessage *lastMessage = [conversation latestMessage];
+        if (lastMessage == nil) {
+            [conversations removeObjectAtIndex:i];
+            i--;
+        }
+    }
     NSArray* sorte = [conversations sortedArrayUsingComparator:
                       ^(EMConversation *obj1, EMConversation* obj2){
                           EMMessage *message1 = [obj1 latestMessage];
@@ -337,7 +345,7 @@
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    NSLog(@"环信总数据数：%d", self.dataSource.count);
+    NSLog(@"环信总数据数：%ld", self.dataSource.count);
     return  self.dataSource.count;
 }
 
@@ -506,6 +514,7 @@
 -(void)refreshDataSource
 {
     self.dataSource = [self loadDataSource];
+    
     [_tableView reloadData];
 //    [self hideHud];
 }

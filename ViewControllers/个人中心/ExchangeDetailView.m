@@ -30,53 +30,60 @@
     [self addSubview:bgView];
     
     UIImageView * headImage = [MyControl createImageViewWithFrame:CGRectMake(0, 0, bgView.frame.size.width, 135) ImageName:@""];
-    [headImage setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@item/%@", IMAGEURL, self.model.img]]];
+    [headImage setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@item/%@", IMAGEURL, self.model.img]] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+        if (image) {
+            CGFloat targetH = headImage.frame.size.width*image.size.height/image.size.width;
+            [MyControl setHeight:targetH WithView:headImage];
+            
+            CGSize size = [self.model.name sizeWithFont:[UIFont systemFontOfSize:15] constrainedToSize:CGSizeMake(bgView.frame.size.width-20, 100) lineBreakMode:1];
+            UILabel * desLabel = [MyControl createLabelWithFrame:CGRectMake(10, headImage.frame.size.height+10, size.width, size.height) Font:15 Text:self.model.name];
+            desLabel.textColor = [UIColor blackColor];
+            [bgView addSubview:desLabel];
+            
+            UIImageView * food = [MyControl createImageViewWithFrame:CGRectMake(10, desLabel.frame.origin.y+desLabel.frame.size.height, 30, 30) ImageName:@"exchange_orangeFood.png"];
+            [bgView addSubview:food];
+            
+            UILabel * price = [MyControl createLabelWithFrame:CGRectMake(food.frame.origin.x+food.frame.size.width+5, food.frame.origin.y, 200, food.frame.size.height) Font:17 Text:self.model.price];
+            price.textColor = ORANGE;
+            [bgView addSubview:price];
+            
+            
+            //534  110
+            UIButton * confirmBtn = [MyControl createButtonWithFrame:CGRectMake((bgView.frame.size.width-534/2)/2.0, bgView.frame.size.height-114/2, 534/2, 110/2) ImageName:@"public_longBtnBg.png" Target:self Action:@selector(confirmBtnClick) Title:@"确认兑换"];
+            [bgView addSubview:confirmBtn];
+            
+            sv = [[UIScrollView alloc] initWithFrame:CGRectMake(5, food.frame.origin.y+food.frame.size.height, bgView.frame.size.width-10, confirmBtn.frame.origin.y-(food.frame.origin.y+food.frame.size.height))];
+            sv.backgroundColor = [ControllerManager colorWithHexString:@"f2f2f2"];
+            [bgView addSubview:sv];
+            
+            
+            NSArray * array = [self.model.des componentsSeparatedByString:@"&"];
+            float w = sv.frame.size.width-10;
+            float totalHeight = 0;
+            int a;
+            for (int i=0; i<array.count; i++) {
+                NSString * str = array[i];
+                CGSize size1 = [str sizeWithFont:[UIFont systemFontOfSize:12] constrainedToSize:CGSizeMake(w, 100) lineBreakMode:1];
+                if (i == 0) {
+                    a = 5;
+                }else{
+                    a = 10;
+                }
+                UILabel * label = [MyControl createLabelWithFrame:CGRectMake(5, a+totalHeight, size1.width, size1.height) Font:12 Text:str];
+                label.textColor = [ControllerManager colorWithHexString:@"414141"];
+                [sv addSubview:label];
+                totalHeight = label.frame.origin.y + size1.height;
+            }
+            
+            sv.contentSize = CGSizeMake(bgView.frame.size.width-10, totalHeight+5);
+        }
+    }];
     [bgView addSubview:headImage];
     
     UIButton * closeBtn = [MyControl createButtonWithFrame:CGRectMake(bgView.frame.size.width-40, 0, 40, 30) ImageName:@"exchange_detail_close.png" Target:self Action:@selector(closeBtnClick) Title:nil];
     [bgView addSubview:closeBtn];
     
-    CGSize size = [self.model.name sizeWithFont:[UIFont systemFontOfSize:15] constrainedToSize:CGSizeMake(bgView.frame.size.width-20, 100) lineBreakMode:1];
-    UILabel * desLabel = [MyControl createLabelWithFrame:CGRectMake(10, headImage.frame.size.height+10, size.width, size.height) Font:15 Text:self.model.name];
-    desLabel.textColor = [UIColor blackColor];
-    [bgView addSubview:desLabel];
     
-    UIImageView * food = [MyControl createImageViewWithFrame:CGRectMake(10, desLabel.frame.origin.y+desLabel.frame.size.height, 30, 30) ImageName:@"exchange_orangeFood.png"];
-    [bgView addSubview:food];
-    
-    UILabel * price = [MyControl createLabelWithFrame:CGRectMake(food.frame.origin.x+food.frame.size.width+5, food.frame.origin.y, 200, food.frame.size.height) Font:17 Text:self.model.price];
-    price.textColor = ORANGE;
-    [bgView addSubview:price];
-    
-    
-    //534  110
-    UIButton * confirmBtn = [MyControl createButtonWithFrame:CGRectMake((bgView.frame.size.width-534/2)/2.0, bgView.frame.size.height-114/2, 534/2, 110/2) ImageName:@"public_longBtnBg.png" Target:self Action:@selector(confirmBtnClick) Title:@"确认兑换"];
-    [bgView addSubview:confirmBtn];
-    
-    sv = [[UIScrollView alloc] initWithFrame:CGRectMake(5, food.frame.origin.y+food.frame.size.height, bgView.frame.size.width-10, confirmBtn.frame.origin.y-(food.frame.origin.y+food.frame.size.height))];
-    sv.backgroundColor = [ControllerManager colorWithHexString:@"f2f2f2"];
-    [bgView addSubview:sv];
-    
-
-    NSArray * array = [self.model.des componentsSeparatedByString:@"&"];
-    float w = sv.frame.size.width-10;
-    float totalHeight = 0;
-    int a;
-    for (int i=0; i<array.count; i++) {
-        NSString * str = array[i];
-        CGSize size1 = [str sizeWithFont:[UIFont systemFontOfSize:12] constrainedToSize:CGSizeMake(w, 100) lineBreakMode:1];
-        if (i == 0) {
-            a = 5;
-        }else{
-            a = 10;
-        }
-        UILabel * label = [MyControl createLabelWithFrame:CGRectMake(5, a+totalHeight, size1.width, size1.height) Font:12 Text:str];
-        label.textColor = [ControllerManager colorWithHexString:@"414141"];
-        [sv addSubview:label];
-        totalHeight = label.frame.origin.y + size1.height;
-    }
-    
-    sv.contentSize = CGSizeMake(bgView.frame.size.width-10, totalHeight+5);
     
 //    NSString * nameStr = array[0];
 //    NSString * rangeStr = array[1];

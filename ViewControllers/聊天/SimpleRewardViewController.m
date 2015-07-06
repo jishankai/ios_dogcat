@@ -45,7 +45,7 @@
     LOADING;
     NSString * sig = [MyMD5 md5:[NSString stringWithFormat:@"img_id=%@&usr_id=%@dog&cat", self.img_id, [USER objectForKey:@"usr_id"]]];
     NSString * url = [NSString stringWithFormat:@"%@%@&usr_id=%@&sig=%@&SID=%@", IMAGEINFOAPI, self.img_id, [USER objectForKey:@"usr_id"], sig, [ControllerManager getSID]];
-    NSLog(@"imageInfoAPI:%@", url);
+//    NSLog(@"imageInfoAPI:%@", url);
     
     httpDownloadBlock * request = [[httpDownloadBlock alloc] initWithUrlStr:url Block:^(BOOL isFinish, httpDownloadBlock * load) {
         if (isFinish) {
@@ -135,7 +135,7 @@
     } completion:^(BOOL finished) {
         selectView.hidden = YES;
     }];
-    NSLog(@"%d", btn.tag);
+    NSLog(@"%ld", btn.tag);
     for (int i=0; i<4; i++) {
         UILabel * label = (UILabel *)[self.view viewWithTag:200+i];
         label.backgroundColor = [UIColor clearColor];

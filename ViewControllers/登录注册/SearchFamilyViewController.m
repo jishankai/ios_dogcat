@@ -293,11 +293,11 @@
     [headerBgView addSubview:whiteLine];
     return headerBgView;
 }
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 125.0f;
 }
--(float)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
     return 70.0f;
 }
@@ -316,7 +316,7 @@
 }
 -(void)showOrHideBtnClick:(UIButton *)button
 {
-    NSLog(@"%d", button.tag);
+    NSLog(@"%ld", button.tag);
     if (didSelected == button.tag-100) {
         didSelected = -1;
         [tv reloadData];
@@ -325,7 +325,7 @@
         [self loadCardDataWithTag:didSelected];
     }
 }
--(void)loadCardDataWithTag:(int)Tag
+-(void)loadCardDataWithTag:(NSInteger)Tag
 {
     NSDictionary * dic = [self.detailDict objectForKey:[self.tempDataArray[didSelected] aid]];
     if (dic) {
@@ -349,7 +349,7 @@
 }
 -(void)joinClick:(UIButton *)button
 {
-    NSLog(@"join-%d", button.tag-200);
+    NSLog(@"join-%ld", button.tag-200);
     
     if ([[USER objectForKey:@"isSuccess"] intValue]) {
         
@@ -452,7 +452,7 @@
 }
 -(void)headBtnClick
 {
-    NSLog(@"click row:%d", didSelected);
+    NSLog(@"click row:%ld", didSelected);
 }
 -(void)backBtnClick
 {

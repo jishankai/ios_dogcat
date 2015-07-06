@@ -38,6 +38,7 @@
     [super viewWillAppear:animated];
     [self downloadLaunchImageInfo];
     
+    
     tempImageView = [MyControl createImageViewWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) ImageName:@""];
     if (self.view.frame.size.height == 240) {
         tempImageView.image = [UIImage imageNamed:@"Default.png"];
@@ -387,6 +388,8 @@
         }else{
             [self login];
         }
+        //
+        [ControllerManager updateGiftList];
     }else{
         [self getPreSID];
         //        return;
@@ -423,6 +426,7 @@
                     [ControllerManager setIsSuccess:[[USER objectForKey:@"isSuccess"] intValue]];
                     [ControllerManager setSID:[USER objectForKey:@"SID"]];
                     
+                    [ControllerManager updateGiftList];
                     [self downloadLaunchImageInfo];
 //                    [self getUserData];
                 }else{
@@ -635,7 +639,7 @@
             shouldLoading = NO;
         }
         if (isFinish) {
-            NSLog(@"petInfo:%@", load.dataDict);
+//            NSLog(@"petInfo:%@", load.dataDict);
             if(![[load.dataDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]]){
                 [self jumpToMain];
                 return;
@@ -735,7 +739,7 @@
     mainTab.foodNum = self.foodNum;
     mainTab.modalTransitionStyle = 2;
     
-    mainTab.selectedIndex = 1;
+//    mainTab.selectedIndex = 1;
 //    if ([[USER objectForKey:@"hasRemoteNotification"] intValue]) {
 //        mainTab.selectedIndex = 3;
 //    }
@@ -873,7 +877,7 @@
 #pragma mark -
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    NSLog(@"%d", buttonIndex);
+    NSLog(@"%ld", buttonIndex);
     if (buttonIndex == 0) {
         shouldLoading = 1;
         if (reloadType == 1) {
